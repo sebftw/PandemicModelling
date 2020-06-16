@@ -4,4 +4,5 @@ A pandemic simulation modelling project for the course [02443 Stochastic Simulat
 ## Useful links
 ### Misc.
 * [A simple model for COVID-19](https://www.sciencedirect.com/science/article/pii/S2468042720300129).
+* [Communal data from Denmark](https://www.ssi.dk/sygdomme-beredskab-og-forskning/sygdomsovervaagning/c/covid19-overvaagning/arkiv-med-overvaagningsdata-for-covid19).
 
