@@ -1,5 +1,6 @@
 |                 Parameter                 | Value                              | Source                                                                                                                          | Distribution |
 |:-----------------------------------------:|------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|--------------|
+| Probability of infection              | Testing                            |                                                                                                                                 |              |
 | Incubation Period (all)                   | Avg 5-6, up to 14                  | [WHO](https://www.who.int/docs/default-source/coronaviruse/situation-reports/20200402-sitrep-73-covid-19.pdf?sfvrsn=5ae25bc7_6) | Gamma        |
 | Probability of hospitalized               | See /data/hospital_admittance.xlsx | [Statens Serum Institut](https://www.ssi.dk/sygdomme-beredskab-og-forskning/sygdomsovervaagning/c/covid19-overvaagning)         |              |
 | # of days sick without hospitalized (all) | 4-6                                | C19REST (DTU Pandemic Model)                                                                                                    | Gamma        |
@@ -8,4 +9,3 @@
 | Probability of recovery                   | See /data/hospital_admittance.xlsx | [Statens Serum Institut](https://www.ssi.dk/sygdomme-beredskab-og-forskning/sygdomsovervaagning/c/covid19-overvaagning)         |              |
 | # of days in hospital (<60)               | 5-9                                | C19REST (DTU Pandemic Model)                                                                                                    | Gamma        |
 | # of days in hospital (>=60)              | 5-15                               | C19REST (DTU Pandemic Model)                                                                                                    | Gamma        |
-| Probability of death given hospitalized   | See /data/hospital_admittance.xlsx | [Statens Serum Institut](https://www.ssi.dk/sygdomme-beredskab-og-forskning/sygdomsovervaagning/c/covid19-overvaagning)         |              |
