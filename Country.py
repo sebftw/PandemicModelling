@@ -1,0 +1,36 @@
+
+
+from Region import Region
+from Sampler import Sampler
+
+
+class Country:
+    
+    def __init__(self, n_regions, population_size, hospital_beds, I_initial,
+                 contagion_prob, crit_prob, death_prob, avg_time_inc, 
+                 avg_time_symp, avg_time_no_symp, avg_time_crit):
+        
+        self.hospital_beds = hospital_beds
+        self.occupied_beds = 0
+        Sampler.contagion_prob = contagion_prob
+        Sampler.crit_prob = crit_prob
+        Sampler.death_prob = death_prob
+        Sampler.avg_time_inc = avg_time_inc
+        Sampler.avg_time_symp = avg_time_symp
+        Sampler.avg_time_no_symp = avg_time_no_symp
+        Sampler.avg_time_crit = avg_time_crit
+
+        self.regions = [Region('Copenhagen', population_size, Sampler(), I_initial)]
+        
+        
+    def simlulate_day(self, t):
+        
+        I_critical = 0
+        R_dead = 0
+        
+        for region in self.regions:
+            region.simulate_day()
+            I_critical += region.I_crit
+            R_dead += region.R_dead
+            
+        return I_critical, R_dead
