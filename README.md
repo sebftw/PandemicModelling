@@ -11,3 +11,6 @@ A pandemic simulation modelling project for the course [02443 Stochastic Simulat
 * [Communal data from Denmark](https://www.ssi.dk/sygdomme-beredskab-og-forskning/sygdomsovervaagning/c/covid19-overvaagning/arkiv-med-overvaagningsdata-for-covid19).
 * [Report on simulations from Statens Serum Institut](https://files.ssi.dk/Tillaegsrapportafden20052020-2).
 * [Models for incubation period](https://github.com/aakhmetz/COVID19SerialInterval).
+*[Daily COVID-19 report Denmark](https://www.ssi.dk/sygdomme-beredskab-og-forskning/sygdomsovervaagning/c/covid19-overvaagning)
+*[Fatality rate for hospitalized patients Denmark](https://www.ssi.dk/-/media/arkiv/dk/aktuelt/sygdomsudbrud/covid19/trend-og-fokus-indlggelser-final.png?la=da)
+*[Denmark all statistics (e.g. hospitalized cases)](https://www.ssi.dk/sygdomme-beredskab-og-forskning/sygdomsovervaagning/c/covid19-overvaagning)
