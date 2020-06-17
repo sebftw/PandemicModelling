@@ -24,7 +24,7 @@ class Region:
         self.transition_crit = defaultdict(int)
         
         
-        self.sampler.update_transition_inc(self.transition_inc, self.I_inc)
+        self.sampler.update_transition_inc(self.transition_inc, self.I_inc,0)
 
         
     def simulate_day(self, t):
@@ -40,7 +40,7 @@ class Region:
         self.S -= new_infected
         self.I_inc += new_infected
         
-        self.sampler.update_transition_inc(self.transition_inc, new_infected)
+        self.sampler.update_transition_inc(self.transition_inc, new_infected, t)
         
         # I_inc to I_symp/I_no_symp
         n_transition_inc = self.transition_inc[t]
@@ -50,8 +50,8 @@ class Region:
         self.I_symp += n_symp
         self.I_no_symp += n_no_symp
         
-        self.sampler.update_transition_symp(self.transition_symp, n_symp)
-        self.sampler.update_transition_no_symp(self.transition_no_symp, n_no_symp)
+        self.sampler.update_transition_symp(self.transition_symp, n_symp, t)
+        self.sampler.update_transition_no_symp(self.transition_no_symp, n_no_symp, t)
         
         # I_symp to I_crit/R_surv
         n_transition_symp = self.transition_symp[t]
@@ -61,7 +61,7 @@ class Region:
         self.I_crit += n_crit
         self.R_surv += n_surv 
         
-        self.sampler.update_transition_crit(self.transition_crit, n_crit)
+        self.sampler.update_transition_crit(self.transition_crit, n_crit, t)
         
         # I_no_symp to R_surv
         n_surv = self.transition_no_symp[t]

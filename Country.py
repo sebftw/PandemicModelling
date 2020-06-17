@@ -8,7 +8,7 @@ class Country:
     
     def __init__(self, n_regions, population_size, hospital_beds, I_initial,
                  contagion_prob, crit_prob, death_prob, avg_time_inc, 
-                 avg_time_symp, avg_time_no_symp, avg_time_crit):
+                 avg_time_symp, avg_time_no_symp, avg_time_crit,avg_people_met):
         
         self.hospital_beds = hospital_beds
         self.occupied_beds = 0
@@ -20,16 +20,16 @@ class Country:
         Sampler.avg_time_no_symp = avg_time_no_symp
         Sampler.avg_time_crit = avg_time_crit
 
-        self.regions = [Region('Copenhagen', population_size, Sampler(), I_initial)]
+        self.regions = [Region('Copenhagen', population_size, Sampler(avg_people_met), I_initial)]
         
         
-    def simlulate_day(self, t):
+    def simulate_day(self, t):
         
         I_critical = 0
         R_dead = 0
         
         for region in self.regions:
-            region.simulate_day()
+            region.simulate_day(t)
             I_critical += region.I_crit
             R_dead += region.R_dead
             
