@@ -11,3 +11,4 @@ A pandemic simulation modelling project for the course [02443 Stochastic Simulat
 * [Communal data from Denmark](https://www.ssi.dk/sygdomme-beredskab-og-forskning/sygdomsovervaagning/c/covid19-overvaagning/arkiv-med-overvaagningsdata-for-covid19).
 * [Report on simulations from Statens Serum Institut](https://files.ssi.dk/Tillaegsrapportafden20052020-2).
 * [Models for incubation period](https://github.com/aakhmetz/COVID19SerialInterval).
+* [Danish SSI model with contact matrices](https://github.com/laecdtu/C19DK).
