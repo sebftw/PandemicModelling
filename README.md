@@ -15,3 +15,17 @@ A pandemic simulation modelling project for the course [02443 Stochastic Simulat
 * [Fatality rate for hospitalized patients Denmark](https://www.ssi.dk/-/media/arkiv/dk/aktuelt/sygdomsudbrud/covid19/trend-og-fokus-indlggelser-final.png?la=da)
 * [Denmark all statistics (e.g. hospitalized cases)](https://www.ssi.dk/sygdomme-beredskab-og-forskning/sygdomsovervaagning/c/covid19-overvaagning)
 * [Danish SSI model with contact matrices](https://github.com/laecdtu/C19DK).
+
+------------------------------
+
+|                     Parameter                     | Value                              | Source                                                                                                                          | Distribution |
+|:-------------------------------------------------:|------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|--------------|
+| Incubation Period (all)                           | Avg 5-6, up to 14                  | [WHO](https://www.who.int/docs/default-source/coronaviruse/situation-reports/20200402-sitrep-73-covid-19.pdf?sfvrsn=5ae25bc7_6) | Gamma        |
+| # of days sick before hospitalized (<60)          | 6-10                               | C19REST (DTU Pandemic Model)                                                                                                    | Gamma        |
+| # of days sick before hospitalized (>=60)         | 5-9                                | C19REST (DTU Pandemic Model)                                                                                                    | Gamma        |
+| Probability of hospitalized                       | See /data/hospital_admittance.xlsx | [Statens Serum Institut](https://www.ssi.dk/sygdomme-beredskab-og-forskning/sygdomsovervaagning/c/covid19-overvaagning)         | -            |
+| Probability of recovery after hospitalized (<60)  | 0.77-0.97                          | C19REST (DTU Pandemic Model)                                                                                                    | -            |
+| Probability of recovery after hospitalized (>=60) | 0.7-0.9                            | C19REST (DTU Pandemic Model)                                                                                                    | -            |
+| # of days in hospital (<60)                       | 5-9                                | C19REST (DTU Pandemic Model)                                                                                                    |              |
+| # of days in hospital (>=60)                      | 5-15                               | C19REST (DTU Pandemic Model)                                                                                                    |              |
+| Probability of death given hospitalized           | See /data/hospital_admittance.xlsx | [Statens Serum Institut](https://www.ssi.dk/sygdomme-beredskab-og-forskning/sygdomsovervaagning/c/covid19-overvaagning)         |              |
