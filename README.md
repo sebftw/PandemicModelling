@@ -15,4 +15,3 @@ A pandemic simulation modelling project for the course [02443 Stochastic Simulat
 *[Fatality rate for hospitalized patients Denmark](https://www.ssi.dk/-/media/arkiv/dk/aktuelt/sygdomsudbrud/covid19/trend-og-fokus-indlggelser-final.png?la=da)
 *[Denmark all statistics (e.g. hospitalized cases)](https://www.ssi.dk/sygdomme-beredskab-og-forskning/sygdomsovervaagning/c/covid19-overvaagning)
 * [Danish SSI model with contact matrices](https://github.com/laecdtu/C19DK).
->>>>>>> edf6c89bec5dd7aba19ff5f5024358b957732a76
