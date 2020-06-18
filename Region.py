@@ -25,10 +25,9 @@ class Region:
         
         
         self.sampler.update_transition_inc(self.transition_inc, self.I_inc,0)
-
         
     def simulate_day(self, t):
-        
+
         # S to I_inc
         new_infected = self.sampler.get_new_infected(
             self.I_inc + self.I_no_symp,
@@ -36,7 +35,7 @@ class Region:
             self.I_symp,
             self.R_surv
         )
-        
+
         self.S -= new_infected
         self.I_inc += new_infected
         
@@ -76,8 +75,8 @@ class Region:
         self.I_crit -= (n_dead + n_surv)
         self.R_dead += n_dead
         self.R_surv += n_surv
-        
     
+
 
 
 

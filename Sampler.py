@@ -19,23 +19,24 @@ class Sampler:
     def __init__(self, avg_people_met):
         
         self.avg_people_met = avg_people_met
-    
+        
+        ## TESTING
+        self.time_spent_in = 0
     
     def get_new_infected(self, I_no_symp, S, I_symp, R_surv):
-        n_infected = 0
+
         I = I_no_symp + I_symp*Sampler.fraction_symp_out
         n_meetable = I + S + R_surv
         
-        total_people_met = np.random.poisson(I/self.avg_people_met )
+        total_people_met = np.random.poisson(I*self.avg_people_met)
         people_met = np.random.randint(0, n_meetable, size=total_people_met)
         S_people_met = people_met[people_met<S]
-        people_met_dict = Counter(S_people_met)
-        for v in people_met_dict.values():
-            infection_prob = (1-(1-Sampler.contagion_prob)**v)
-            coin = np.random.uniform()
-            if coin < infection_prob:
-                n_infected+=1
-                
+        
+        _, counts = np.unique(S_people_met, return_counts=True)
+        infection_probs = (1 - np.power(1 - Sampler.contagion_prob, counts))
+        coin_tosses = np.random.uniform(size=infection_probs.shape[0])
+        n_infected = np.count_nonzero(coin_tosses < infection_probs)
+
         return n_infected
         
         
