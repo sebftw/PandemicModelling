@@ -32,8 +32,15 @@ avg_time_no_symp = 7.5
 avg_time_crit = 9
 
 n_days = 1000
-I_crits = np.zeros(n_days)
-R_deads = np.zeros(n_days)
+
+I_inc = np.zeros(n_days)
+I_crit = np.zeros(n_days)
+R_dead = np.zeros(n_days)
+S = np.zeros(n_days)
+I_no_symp = np.zeros(n_days)
+I_symp = np.zeros(n_days)
+R_surv = np.zeros(n_days)
+
 
 Denmark = Country(n_regions, population_size, hospital_beds, I_initial,
                  contagion_prob, crit_prob, death_prob, symp_prob, 
@@ -43,21 +50,20 @@ Denmark = Country(n_regions, population_size, hospital_beds, I_initial,
 for t in range(1, n_days+1):
     if t % 10 == 0:
         print(f'Iteration {t}/{n_days}')
-    I_critical, R_dead = Denmark.simulate_day(t)
+    I_crit[t-1], R_dead[t-1], S[t-1], I_inc[t-1], I_no_symp[t-1], I_symp[t-1], R_surv[t-1] = Denmark.simulate_day(t)
             
-    I_crits[t-1] = I_critical
-    R_deads[t-1] = R_dead
+    
 
 # %% Plotting
 
 fig, ax = plt.subplots(1, 1, figsize=(7,3))
-ax.plot(I_crits, c='lightskyblue', label=f'Hospitalized')
+ax.plot(I_crit, c='lightskyblue', label=f'Hospitalized')
 ax.hlines(hospital_beds, 0, n_days, label=f'Respirators')
 ax.legend()
 ax.set_title('Number of hospitalized people')
 
 fig, ax = plt.subplots(1, 1, figsize=(7,3))
-ax.plot(R_deads, c='lightskyblue', label=f'Deaths')
+ax.plot(R_dead, c='lightskyblue', label=f'Deaths')
 ax.legend()
 ax.set_title('Total fatalities')
 
