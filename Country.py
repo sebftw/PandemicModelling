@@ -23,8 +23,7 @@ class Country:
         I_crit = 0
         R_dead = 0
         R_surv = 0
-        
-        
+
         for region in self.regions:
             region.simulate_day(t)
             

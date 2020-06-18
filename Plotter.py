@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 
+
 def plot_hospitalized_people(I_crit, hospital_beds, n_days):
     # %% Plotting
     fig, ax = plt.subplots(1, 1, figsize=(7,3))

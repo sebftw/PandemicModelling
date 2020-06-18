@@ -20,22 +20,21 @@ plt.rc('ytick', labelsize=SMALL_SIZE)  # fontsize of the tick labels
 plt.rc('legend', fontsize=SMALL_SIZE)  # legend fontsize
 plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
-population_size = 50_000  # 5_000_000
-I_initial = 50
+population_size = 1_000_000  # 5_000_000
+I_initial = 500
 hospital_beds = 750
 
 sampler = Sampler(
-    avg_people_met=5
-    , contagion_prob=0.04
-    , crit_prob=0.2
-    , death_prob=0.22
-    , symp_prob=0.2
-    , fraction_symp_out=0.1
-
-    , avg_time_inc=5
-    , avg_time_symp=7.5
-    , avg_time_no_symp=7.5
-    , avg_time_crit=9
+    avg_people_met=4,
+    contagion_prob=0.032,
+    crit_prob=0.2,
+    death_prob=0.22,
+    symp_prob=0.5,
+    fraction_symp_out=0.2,
+    avg_time_inc=5,
+    avg_time_symp=7.5,
+    avg_time_no_symp=7.5,
+    avg_time_crit=9
 )
 
 n_days = 365
@@ -58,22 +57,22 @@ for _ in range(1):
         I_crit[t], R_dead[t], S[t], I_inc[t], I_no_symp[t], I_symp[t], R_surv[t] = Denmark.simulate_day(t)
         times.append(time.time())
 
-    pandemic_info = dict({"I_crit" : I_crit,
-                          "I_inc" : I_inc,
-                          "R_dead" : R_dead,
-                          "S" : S,
+    pandemic_info = dict({"I_crit": I_crit,
+                          "I_inc": I_inc,
+                          "R_dead": R_dead,
+                          "S": S,
                           "I_no_symp": I_no_symp,
                           "I_symp": I_symp,
                           "R_surv": R_surv})
 
 print('Time taken', times[-1] - times[0])
 
-if True:
+Plotter.plot_hospitalized_people(I_crit, hospital_beds, n_days)
+plt.show()
+
+if False:
     # %% Plotting
     Plotter.plot_fatalities(R_dead)
-    plt.show()
-
-    Plotter.plot_hospitalized_people(I_crit, hospital_beds, n_days)
     plt.show()
 
     N = 10
@@ -88,23 +87,4 @@ if True:
 
     Plotter.plot_each_group(pandemic_info)
 
-
     # dette er en ændring
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
