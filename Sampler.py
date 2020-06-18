@@ -25,14 +25,18 @@ class Sampler:
     def get_new_infected(self, I_no_symp, S, I_symp, R_surv):
         I = I_no_symp + I_symp*self.fraction_symp_out
         n_meetable = I + S + R_surv
-        
-        total_people_met = np.random.poisson(I*self.avg_people_met)
-        people_met = np.random.randint(0, n_meetable, size=total_people_met)  #-1
-        S_people_met = people_met[people_met < S]
 
-        coin_tosses = np.random.uniform(size=S_people_met.shape[0])
+        total_S_people_met = np.random.poisson(I*self.avg_people_met * (S / n_meetable))
+
+        # S_people_met = np.random.randint(0, S, size=total_S_people_met)  # -1
+        S_people_met = np.floor(np.random.uniform(size=total_S_people_met) * S)
+
+        # Sample for each S-person a binomial of how many infected people they meet.
+        coin_tosses = np.random.uniform(size=total_S_people_met)
         S_new_infected = S_people_met[coin_tosses < self.contagion_prob]
         n_infected = len(np.unique(S_new_infected))
+        # print(np.random.binomial(S, p=1-(1-self.contagion_prob) ** (total_S_people_met/S)), n_infected)
+        # n_infected = np.random.binomial(S, p=1 - (1 - self.contagion_prob) ** (total_S_people_met / S))
 
         return n_infected
 
@@ -41,43 +45,28 @@ class Sampler:
         return inc_times
             
     def cointoss_inc(self, n_transition_inc):
-        coin_tosses = np.random.uniform(size=n_transition_inc)
-        
-        n_symp = np.count_nonzero(coin_tosses < self.symp_prob)
+        n_symp = np.random.binomial(n_transition_inc, self.symp_prob)
         n_no_symp = n_transition_inc - n_symp
-        
         return n_symp, n_no_symp
     
-    def update_transition_symp(self, transition_symp, n_symp, t):
+    def sample_symptom_times(self, n_symp):
         symp_times = np.random.gamma(self.avg_time_symp/0.8, 0.8, size=n_symp).astype(int)
+        return symp_times
         
-        for symp_t in symp_times:
-            transition_symp[t+symp_t] += 1
-        
-    def update_transition_no_symp(self, transition_no_symp, n_no_symp, t):
+    def sample_no_symptom_times(self, n_no_symp):
         no_symp_times = np.random.gamma(self.avg_time_no_symp/0.8, 0.8, size=n_no_symp).astype(int)
-        
-        for no_symp_t in no_symp_times:
-            transition_no_symp[t+no_symp_t] += 1
+        return no_symp_times
     
     def cointoss_symp(self, n_transition_symp):
-        coin_tosses = np.random.uniform(size=n_transition_symp)
-        
-        n_crit = np.count_nonzero(coin_tosses < self.crit_prob)
+        n_crit = np.random.binomial(n_transition_symp, self.crit_prob)
         n_surv = n_transition_symp - n_crit
-        
         return n_crit, n_surv
     
-    def update_transition_crit(self, transition_crit, n_crit, t):
+    def sample_critical_times(self, n_crit):
         crit_times = np.random.gamma(self.avg_time_crit/0.5, 0.5, size=n_crit).astype(int)
-        
-        for crit_t in crit_times:
-            transition_crit[t+crit_t] += 1
+        return crit_times
             
-    def cointoss_crit(self,n_transition_crit):
-        coin_tosses = np.random.uniform(size=n_transition_crit)
-        
-        n_dead = np.count_nonzero(coin_tosses < self.death_prob)
+    def cointoss_crit(self, n_transition_crit):
+        n_dead = np.random.binomial(n_transition_crit, self.death_prob)
         n_surv = n_transition_crit - n_dead
-        
         return n_dead, n_surv

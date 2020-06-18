@@ -3,6 +3,7 @@ import numpy as np
 from Country import Country
 import Plotter
 import time
+from tqdm import tqdm
 
 from Region import Region
 from Sampler import Sampler
@@ -19,7 +20,7 @@ plt.rc('ytick', labelsize=SMALL_SIZE)  # fontsize of the tick labels
 plt.rc('legend', fontsize=SMALL_SIZE)  # legend fontsize
 plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
-population_size = 5_000_000
+population_size = 50_000  # 5_000_000
 I_initial = 50
 hospital_beds = 750
 
@@ -28,7 +29,7 @@ sampler = Sampler(
     , contagion_prob=0.04
     , crit_prob=0.2
     , death_prob=0.22
-    , symp_prob=1.0
+    , symp_prob=0.2
     , fraction_symp_out=0.1
 
     , avg_time_inc=5
@@ -47,16 +48,15 @@ I_no_symp = np.zeros(n_days)
 I_symp = np.zeros(n_days)
 R_surv = np.zeros(n_days)
 
-
 times = []
 
 for _ in range(1):
     Copenhagen = Region('Copenhagen', population_size, sampler, I_initial)
-    Denmark = Country([Copenhagen], hospital_beds)
-    for t in range(1, n_days+1):
-        if t % 10 == 0:
-            print(f'Iteration {t}/{n_days}')
-        I_crit[t-1], R_dead[t-1], S[t-1], I_inc[t-1], I_no_symp[t-1], I_symp[t-1], R_surv[t-1] = Denmark.simulate_day(t)
+    Denmark = Country([Copenhagen], hospital_beds, n_days)
+    times.append(time.time())
+    for t in tqdm(range(n_days)):
+        I_crit[t], R_dead[t], S[t], I_inc[t], I_no_symp[t], I_symp[t], R_surv[t] = Denmark.simulate_day(t)
+        times.append(time.time())
 
     pandemic_info = dict({"I_crit" : I_crit,
                           "I_inc" : I_inc,
@@ -65,32 +65,31 @@ for _ in range(1):
                           "I_no_symp": I_no_symp,
                           "I_symp": I_symp,
                           "R_surv": R_surv})
-    times.append(time.time())
-
-
-
-
-# %% Plotting
-Plotter.plot_fatalities(R_dead)
-
-Plotter.plot_hospitalized_people(I_crit, hospital_beds, n_days)
-        times.append(time.time())
 
 print('Time taken', times[-1] - times[0])
-N = 10
-difftimes = np.diff(np.array(times))
-difftimes = np.convolve(difftimes, np.ones((N,)) / N, mode='valid')  # Smoothing
-plt.plot(difftimes)
-plt.title('Time per iteration.')
-plt.show()
-# %% Plotting
 
-Plotter.plot_SIR(pandemic_info)
+if True:
+    # %% Plotting
+    Plotter.plot_fatalities(R_dead)
+    plt.show()
 
-Plotter.plot_each_group(pandemic_info)
+    Plotter.plot_hospitalized_people(I_crit, hospital_beds, n_days)
+    plt.show()
+
+    N = 10
+    difftimes = np.diff(np.array(times))
+    difftimes = np.convolve(difftimes, np.ones((N,)) / N, mode='valid')  # Smoothing
+    plt.plot(difftimes)
+    plt.title('Time per iteration.')
+    plt.show()
+    # %% Plotting
+
+    Plotter.plot_SIR(pandemic_info)
+
+    Plotter.plot_each_group(pandemic_info)
 
 
-# dette er en ændring
+    # dette er en ændring
 
 
 

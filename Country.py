@@ -6,16 +6,16 @@ from Sampler import Sampler
 
 class Country:
     
-    def __init__(self, regions, hospital_beds):
-        
+    def __init__(self, regions, hospital_beds, n_days):
         self.hospital_beds = hospital_beds
         self.occupied_beds = 0
-
         self.regions = regions
+
+        for region in self.regions:
+            region.initialize(n_days)
         
         
     def simulate_day(self, t):
-        
         S = 0
         I_inc = 0
         I_no_symp = 0
