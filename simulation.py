@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from Country import Country
+import Plotter
 import time
 
 from Region import Region
@@ -36,48 +37,74 @@ sampler = Sampler(
     , avg_time_crit=9
 )
 
-n_days = 1000
-I_crits = np.zeros(n_days)
-R_deads = np.zeros(n_days)
+n_days = 365
+
+I_inc = np.zeros(n_days)
+I_crit = np.zeros(n_days)
+R_dead = np.zeros(n_days)
+S = np.zeros(n_days)
+I_no_symp = np.zeros(n_days)
+I_symp = np.zeros(n_days)
+R_surv = np.zeros(n_days)
+
 
 times = []
 
 for _ in range(1):
-    Copenhagen = Region('Copenhagen', population_size, sampler, I_initial)
-
     Denmark = Country([Copenhagen], hospital_beds)
+    for t in range(1, n_days+1):
+        if t % 10 == 0:
+            print(f'Iteration {t}/{n_days}')
+        I_crit[t-1], R_dead[t-1], S[t-1], I_inc[t-1], I_no_symp[t-1], I_symp[t-1], R_surv[t-1] = Denmark.simulate_day(t)
 
+    pandemic_info = dict({"I_crit" : I_crit,
+                          "I_inc" : I_inc,
+                          "R_dead" : R_dead,
+                          "S" : S,
+                          "I_no_symp": I_no_symp,
+                          "I_symp": I_symp,
+                          "R_surv": R_surv})
     times.append(time.time())
-    for t in range(0, n_days + 1):
-        # if t % 10 == 0:
-        #    print(f'Iteration {t}/{n_days}')
-        I_critical, R_dead = Denmark.simulate_day(t)
 
-        I_crits[t - 1] = I_critical
-        R_deads[t - 1] = R_dead
 
+
+
+# %% Plotting
+Plotter.plot_fatalities(R_dead)
+
+Plotter.plot_hospitalized_people(I_crit, hospital_beds, n_days)
         times.append(time.time())
 
 print('Time taken', times[-1] - times[0])
-if True:
-    N = 10
-    difftimes = np.diff(np.array(times))
-    difftimes = np.convolve(difftimes, np.ones((N,)) / N, mode='valid')  # Smoothing
-    plt.plot(difftimes)
-    plt.title('Time per iteration.')
-    plt.show()
-    # %% Plotting
+N = 10
+difftimes = np.diff(np.array(times))
+difftimes = np.convolve(difftimes, np.ones((N,)) / N, mode='valid')  # Smoothing
+plt.plot(difftimes)
+plt.title('Time per iteration.')
+plt.show()
+# %% Plotting
 
-    fig, ax = plt.subplots(1, 1, figsize=(7, 3))
-    ax.plot(I_crits, c='lightskyblue', label=f'Hospitalized')
-    ax.hlines(hospital_beds, 0, n_days, label=f'Respirators')
-    ax.legend()
-    ax.set_title('Number of hospitalized people')
-    plt.show()
+Plotter.plot_SIR(pandemic_info)
 
-    fig, ax = plt.subplots(1, 1, figsize=(7, 3))
-    ax.plot(R_deads, c='lightskyblue', label=f'Deaths')
-    ax.legend()
-    ax.set_title('Total fatalities')
+Plotter.plot_each_group(pandemic_info)
 
-    plt.show()
+
+# dette er en ændring
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
