@@ -74,6 +74,7 @@ Plotter.plot_SIR(pandemic_info)
 Plotter.plot_each_group(pandemic_info)
 
 
+# dette er en ændring
 
 
 
