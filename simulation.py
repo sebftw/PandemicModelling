@@ -67,6 +67,7 @@ ax.plot(R_dead, c='lightskyblue', label=f'Deaths')
 ax.legend()
 ax.set_title('Total fatalities')
 
+# dette er en ændring
 
 
 
