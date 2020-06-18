@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from Country import Country
+import Plotter
 
 SMALL_SIZE = 14
 MEDIUM_SIZE = 16
@@ -16,7 +17,7 @@ plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 avg_people_met = 5
 n_regions = 1
-population_size = 5_000_000
+population_size = 5_000
 hospital_beds = 750
 I_initial = 50
 
@@ -31,7 +32,7 @@ avg_time_symp = 7.5
 avg_time_no_symp = 7.5
 avg_time_crit = 9
 
-n_days = 1000
+n_days = 365
 
 I_inc = np.zeros(n_days)
 I_crit = np.zeros(n_days)
@@ -52,20 +53,26 @@ for t in range(1, n_days+1):
         print(f'Iteration {t}/{n_days}')
     I_crit[t-1], R_dead[t-1], S[t-1], I_inc[t-1], I_no_symp[t-1], I_symp[t-1], R_surv[t-1] = Denmark.simulate_day(t)
             
-    
+pandemic_info = dict({"I_crit" : I_crit, 
+                      "I_inc" : I_inc,
+                      "R_dead" : R_dead,
+                      "S" : S,
+                      "I_no_symp": I_no_symp,
+                      "I_symp": I_symp,
+                      "R_surv": R_surv})
+
+
+
 
 # %% Plotting
+Plotter.plot_fatalities(R_dead)
 
-fig, ax = plt.subplots(1, 1, figsize=(7,3))
-ax.plot(I_crit, c='lightskyblue', label=f'Hospitalized')
-ax.hlines(hospital_beds, 0, n_days, label=f'Respirators')
-ax.legend()
-ax.set_title('Number of hospitalized people')
+Plotter.plot_hospitalized_people(I_crit, hospital_beds, n_days)
 
-fig, ax = plt.subplots(1, 1, figsize=(7,3))
-ax.plot(R_dead, c='lightskyblue', label=f'Deaths')
-ax.legend()
-ax.set_title('Total fatalities')
+Plotter.plot_SIR(pandemic_info)
+
+Plotter.plot_each_group(pandemic_info)
+
 
 
 
