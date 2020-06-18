@@ -51,6 +51,7 @@ R_surv = np.zeros(n_days)
 times = []
 
 for _ in range(1):
+    Copenhagen = Region('Copenhagen', population_size, sampler, I_initial)
     Denmark = Country([Copenhagen], hospital_beds)
     for t in range(1, n_days+1):
         if t % 10 == 0:
