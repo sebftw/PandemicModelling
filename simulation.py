@@ -8,35 +8,43 @@ from tqdm import tqdm
 from Region import Region
 from Sampler import Sampler
 
-SMALL_SIZE = 14
-MEDIUM_SIZE = 16
-BIGGER_SIZE = 18
 
-plt.rc('font', size=SMALL_SIZE)  # controls default text sizes
-plt.rc('axes', titlesize=MEDIUM_SIZE)  # fontsize of the axes title
-plt.rc('axes', labelsize=MEDIUM_SIZE)  # fontsize of the x and y labels
-plt.rc('xtick', labelsize=SMALL_SIZE)  # fontsize of the tick labels
-plt.rc('ytick', labelsize=SMALL_SIZE)  # fontsize of the tick labels
-plt.rc('legend', fontsize=SMALL_SIZE)  # legend fontsize
-plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
-
-population_size = 50_000  # 5_000_000
+population_size = 100  # 5_000_000
 I_initial = 50
 hospital_beds = 750
+SIR = True
+plot_data = True
 
-sampler = Sampler(
-    avg_people_met=5
-    , contagion_prob=0.04
-    , crit_prob=0.2
-    , death_prob=0.22
-    , symp_prob=0.2
-    , fraction_symp_out=0.1
+if SIR:
+    sampler = Sampler(
+        avg_people_met=5
+        , contagion_prob=0.04
+        , crit_prob=0.0
+        , death_prob=1.0
+        , symp_prob=1.0
+        , fraction_symp_out=1.0
+    
+        , avg_time_inc=0.0
+        , avg_time_symp=7.5
+        , avg_time_no_symp=7.5
+        , avg_time_crit=9
+    )
+else:
+    sampler = Sampler(
+        avg_people_met=5
+        , contagion_prob=0.04
+        , crit_prob=0.2
+        , death_prob=0.22
+        , symp_prob=0.2
+        , fraction_symp_out=0.1
+    
+        , avg_time_inc=5
+        , avg_time_symp=7.5
+        , avg_time_no_symp=7.5
+        , avg_time_crit=9
+    )
 
-    , avg_time_inc=5
-    , avg_time_symp=7.5
-    , avg_time_no_symp=7.5
-    , avg_time_crit=9
-)
+
 
 n_days = 365
 
@@ -68,7 +76,7 @@ for _ in range(1):
 
 print('Time taken', times[-1] - times[0])
 
-if True:
+if plot_data:
     # %% Plotting
     Plotter.plot_fatalities(R_dead)
     plt.show()

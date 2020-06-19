@@ -41,7 +41,11 @@ class Sampler:
         return n_infected
 
     def sample_incubation_times(self, new_infected):
-        inc_times = np.random.gamma(self.avg_time_inc, 1, size=new_infected).astype(int)
+        if self.avg_time_inc == 0:
+            inc_times = np.zeros(new_infected).astype(int)
+        else:
+            inc_times = np.random.gamma(self.avg_time_inc, 1, size=new_infected).astype(int)
+        
         return inc_times
             
     def cointoss_inc(self, n_transition_inc):
