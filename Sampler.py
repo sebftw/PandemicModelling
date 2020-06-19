@@ -3,7 +3,7 @@ from collections import Counter
 
 class Sampler:
 
-    def __init__(self, avg_people_met,
+    def __init__(self, avg_people_met=4,
                  contagion_prob=0.05, crit_prob=0.2,
                  death_prob=0.22, symp_prob=1, fraction_symp_out=0.5,
                  avg_time_inc=5, avg_time_symp=7.5, avg_time_no_symp=7.5,
@@ -37,7 +37,6 @@ class Sampler:
         n_infected = len(np.unique(S_new_infected))
         # print(np.random.binomial(S, p=1-(1-self.contagion_prob) ** (total_S_people_met/S)), n_infected)
         # n_infected = np.random.binomial(S, p=1 - (1 - self.contagion_prob) ** (total_S_people_met / S))
-
         return n_infected
 
     def sample_incubation_times(self, new_infected):
