@@ -10,35 +10,42 @@ from Region import Region
 from Sampler import Sampler
 import pandas as pd
 
-SMALL_SIZE = 14
-MEDIUM_SIZE = 16
-BIGGER_SIZE = 18
-
-plt.rc('font', size=SMALL_SIZE)  # controls default text sizes
-plt.rc('axes', titlesize=MEDIUM_SIZE)  # fontsize of the axes title
-plt.rc('axes', labelsize=MEDIUM_SIZE)  # fontsize of the x and y labels
-plt.rc('xtick', labelsize=SMALL_SIZE)  # fontsize of the tick labels
-plt.rc('ytick', labelsize=SMALL_SIZE)  # fontsize of the tick labels
-plt.rc('legend', fontsize=SMALL_SIZE)  # legend fontsize
-plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
-
-population_size = 50_000  # 5_000_000
-I_initial = 50
+population_size = 5_000  # 5_000_000
+I_initial = 500
 hospital_beds = 750
+SIR = False
+plot_data = True
 
-sampler = Sampler(
-    avg_people_met=5
-    , contagion_prob=0.03
-    , crit_prob=0.2
-    , death_prob=0.22
-    , symp_prob=0.2
-    , fraction_symp_out=0.1
+if SIR:
+    sampler = Sampler(
+        avg_people_met=5
+        , contagion_prob=0.04
+        , crit_prob=0.0 # DONT CHANGE (0)
+        , death_prob=1.0 # UNUSED
+        , symp_prob=1.0 # DONT CHANGE (1)
+        , fraction_symp_out = 0.8
+    
+        #, avg_time_inc=0.0 # DONT CHANGE (0)
+        #, avg_time_symp=7.5 # UNUSED
+        #, avg_time_no_symp=7.5 
+        , avg_time_crit=10 #UNUSED
+    )
+else:
+    sampler = Sampler(
+        avg_people_met=5
+        , contagion_prob=0.04
+        , crit_prob=0.2
+        , death_prob=0.22
+        , symp_prob=0.2
+        , fraction_symp_out=0.1
+    
+        #, avg_time_inc=5
+        #, avg_time_symp=7.5
+        #, avg_time_no_symp=7.5
+        , avg_time_crit=10
+    )
 
-    , avg_time_inc=5
-    , avg_time_symp=7.5
-    , avg_time_no_symp=7.5
-    , avg_time_crit=9
-)
+
 
 n_days = 365
 
@@ -71,6 +78,18 @@ copenhagen = Region('Copenhagen', population_size, sampler, I_initial)
 country = Country([copenhagen], hospital_beds, n_days)
 result = simulate(country)
 
+if plot_data:
+    # %% Plotting
+    Plotter.plot_fatalities(result['R_dead'])
+    plt.show()
+
+    if SIR:
+        sick_people_on_hospital_fraction = 0.1
+        Plotter.plot_hospitalized_people(result['I_symp']*sick_people_on_hospital_fraction, hospital_beds)
+    else:
+        Plotter.plot_hospitalized_people(result['I_crit'], hospital_beds)
+    plt.show()
+
 # Plotting
 Plotter.plot_fatalities(result['R_dead'])
 plt.show()
@@ -87,7 +106,6 @@ plt.show()
 
 ### MULTIPLE SIMULATION
 result = repeat_simulate(country)
-
 Plotter.plot_intervals(result['R_dead'])
 plt.show()
 
