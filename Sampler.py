@@ -69,7 +69,7 @@ class Sampler:
         return n_crit, n_surv
     
     def sample_critical_times(self, n_crit):
-        crit_times = np.random.gamma(self.avg_time_crit/0.5, 0.5, size=n_crit).astype(int)
+        crit_times = np.random.gamma(self.avg_time_crit/0.8, 0.8, size=n_crit).astype(int)
         return crit_times
             
     def cointoss_crit(self, n_transition_crit):

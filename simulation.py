@@ -8,7 +8,6 @@ from tqdm import tqdm
 from Region import Region
 from Sampler import Sampler
 
-
 population_size = 5_000_000  # 5_000_000
 I_initial = 500
 hospital_beds = 750
@@ -27,7 +26,7 @@ if SIR:
         #, avg_time_inc=0.0 # DONT CHANGE (0)
         #, avg_time_symp=7.5 # UNUSED
         #, avg_time_no_symp=7.5 
-        , avg_time_crit=9 #UNUSED
+        , avg_time_crit=10 #UNUSED
     )
 else:
     sampler = Sampler(
@@ -41,7 +40,7 @@ else:
         #, avg_time_inc=5
         #, avg_time_symp=7.5
         #, avg_time_no_symp=7.5
-        , avg_time_crit=9
+        , avg_time_crit=10
     )
 
 
