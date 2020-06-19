@@ -22,6 +22,10 @@ class Region:
         self.transition_no_symp = np.zeros(n_days, dtype=np.int)
         self.transition_crit = np.zeros(n_days, dtype=np.int)
 
+        # At day 0, we initialize. I.e. we set the incubation times for the initial infected.
+        inc_times = self.sampler.sample_incubation_times(self.I_inc)
+        self.increment_array(self.transition_inc, inc_times)
+
     def increment_array(self, array, increments):
         increments = increments[increments < array.shape[0]]  # Prevent out of bounds at sim. end.
         indices, counts = np.unique(increments, return_counts=True)
@@ -33,12 +37,6 @@ class Region:
 
 
     def simulate_day(self, t):
-        if t == 0:
-            # At day 0, we initialize. I.e. we set the incubation times for the initial infected.
-            inc_times = self.sampler.sample_incubation_times(self.I_inc)
-            self.increment_array(self.transition_inc[t:], inc_times)
-            return None
-
         # S to I_inc
         new_infected = self.sampler.get_new_infected(
             self.I_inc + self.I_no_symp,
@@ -66,7 +64,6 @@ class Region:
                              self.sampler.sample_symptom_times(n_symp))
         self.increment_array(self.transition_no_symp[t:],
                              self.sampler.sample_no_symptom_times(n_no_symp))
-
 
         
         # I_symp to I_crit/R_surv
