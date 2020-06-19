@@ -9,25 +9,25 @@ from Region import Region
 from Sampler import Sampler
 
 
-population_size = 100  # 5_000_000
-I_initial = 50
+population_size = 5_000_000  # 5_000_000
+I_initial = 500
 hospital_beds = 750
-SIR = True
+SIR = False
 plot_data = True
 
 if SIR:
     sampler = Sampler(
         avg_people_met=5
         , contagion_prob=0.04
-        , crit_prob=0.0
-        , death_prob=1.0
-        , symp_prob=1.0
-        , fraction_symp_out=1.0
+        , crit_prob=0.0 # DONT CHANGE (0)
+        , death_prob=1.0 # UNUSED
+        , symp_prob=1.0 # DONT CHANGE (1)
+        , fraction_symp_out = 0.8
     
-        , avg_time_inc=0.0
-        , avg_time_symp=7.5
-        , avg_time_no_symp=7.5
-        , avg_time_crit=9
+        #, avg_time_inc=0.0 # DONT CHANGE (0)
+        #, avg_time_symp=7.5 # UNUSED
+        #, avg_time_no_symp=7.5 
+        , avg_time_crit=9 #UNUSED
     )
 else:
     sampler = Sampler(
@@ -38,9 +38,9 @@ else:
         , symp_prob=0.2
         , fraction_symp_out=0.1
     
-        , avg_time_inc=5
-        , avg_time_symp=7.5
-        , avg_time_no_symp=7.5
+        #, avg_time_inc=5
+        #, avg_time_symp=7.5
+        #, avg_time_no_symp=7.5
         , avg_time_crit=9
     )
 
@@ -81,7 +81,11 @@ if plot_data:
     Plotter.plot_fatalities(R_dead)
     plt.show()
 
-    Plotter.plot_hospitalized_people(I_crit, hospital_beds, n_days)
+    if SIR:
+        sick_people_on_hospital_fraction = 0.1
+        Plotter.plot_hospitalized_people(I_symp*sick_people_on_hospital_fraction, hospital_beds, n_days)
+    else:
+        Plotter.plot_hospitalized_people(I_crit, hospital_beds, n_days)
     plt.show()
 
     N = 10
@@ -96,8 +100,6 @@ if plot_data:
 
     Plotter.plot_each_group(pandemic_info)
 
-
-    # dette er en ændring
 
 
 

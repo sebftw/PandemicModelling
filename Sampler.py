@@ -43,8 +43,9 @@ class Sampler:
         if self.avg_time_inc == 0:
             inc_times = np.zeros(new_infected).astype(int)
         else:
-            inc_times = np.random.gamma(self.avg_time_inc, 1, size=new_infected).astype(int)
-        
+            #inc_times = np.random.gamma(self.avg_time_inc, 1, size=new_infected).astype(int)
+            inc_times = np.random.lognormal(1.57, 0.65, size=new_infected).astype(int)
+
         return inc_times
             
     def cointoss_inc(self, n_transition_inc):
@@ -53,11 +54,13 @@ class Sampler:
         return n_symp, n_no_symp
     
     def sample_symptom_times(self, n_symp):
-        symp_times = np.random.gamma(self.avg_time_symp/0.8, 0.8, size=n_symp).astype(int)
+        #symp_times = np.random.gamma(self.avg_time_symp/0.8, 0.8, size=n_symp).astype(int)
+        symp_times = np.random.lognormal(1.23, 0.79, size=n_symp).astype(int)
         return symp_times
         
     def sample_no_symptom_times(self, n_no_symp):
-        no_symp_times = np.random.gamma(self.avg_time_no_symp/0.8, 0.8, size=n_no_symp).astype(int)
+        #no_symp_times = np.random.gamma(self.avg_time_no_symp/0.8, 0.8, size=n_no_symp).astype(int)
+        no_symp_times = np.random.lognormal(1.23, 0.79, size=n_no_symp).astype(int)
         return no_symp_times
     
     def cointoss_symp(self, n_transition_symp):
