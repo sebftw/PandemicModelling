@@ -4,9 +4,11 @@ from Country import Country
 import Plotter
 import time
 from tqdm import tqdm
+import copy
 
 from Region import Region
 from Sampler import Sampler
+import pandas as pd
 
 SMALL_SIZE = 14
 MEDIUM_SIZE = 16
@@ -26,7 +28,7 @@ hospital_beds = 750
 
 sampler = Sampler(
     avg_people_met=5
-    , contagion_prob=0.04
+    , contagion_prob=0.03
     , crit_prob=0.2
     , death_prob=0.22
     , symp_prob=0.2
@@ -40,57 +42,54 @@ sampler = Sampler(
 
 n_days = 365
 
-I_inc = np.zeros(n_days)
-I_crit = np.zeros(n_days)
-R_dead = np.zeros(n_days)
-S = np.zeros(n_days)
-I_no_symp = np.zeros(n_days)
-I_symp = np.zeros(n_days)
-R_surv = np.zeros(n_days)
 
-times = []
+def collate(results, axis=0):
+    d = {}
+    for k in results[0].keys():
+        d[k] = np.stack(list(d[k] for d in results), axis=axis)
+    return d
 
-for _ in range(1):
-    Copenhagen = Region('Copenhagen', population_size, sampler, I_initial)
-    Denmark = Country([Copenhagen], hospital_beds, n_days)
-    times.append(time.time())
-    for t in tqdm(range(n_days)):
-        I_crit[t], R_dead[t], S[t], I_inc[t], I_no_symp[t], I_symp[t], R_surv[t] = Denmark.simulate_day(t)
-        times.append(time.time())
+def simulate(country, n_days=365, progress_bar=True):
+    country.initialize(n_days)  # Alternatively: copy.deepcopy(country)
 
-    pandemic_info = dict({"I_crit" : I_crit,
-                          "I_inc" : I_inc,
-                          "R_dead" : R_dead,
-                          "S" : S,
-                          "I_no_symp": I_no_symp,
-                          "I_symp": I_symp,
-                          "R_surv": R_surv})
+    results = []
+    for t in tqdm(range(n_days), desc='Simulating pandemic', unit='day', disable=not progress_bar):
+        pandemic_info = country.simulate_day(t)
+        pandemic_info['iter_time'] = time.time()
+        results.append(pandemic_info)
 
-print('Time taken', times[-1] - times[0])
+    return collate(results)
 
-if True:
-    # %% Plotting
-    Plotter.plot_fatalities(R_dead)
-    plt.show()
+def repeat_simulate(country, n_repeats=50, n_days=365):
+    results = []
+    for _ in tqdm(range(n_repeats), desc='Repeating simulations', unit='simulations'):
+        results.append(simulate(country, n_days, False))
+    return collate(results)
 
-    Plotter.plot_hospitalized_people(I_crit, hospital_beds, n_days)
-    plt.show()
+### SINGLE SIMULATION
+copenhagen = Region('Copenhagen', population_size, sampler, I_initial)
+country = Country([copenhagen], hospital_beds, n_days)
+result = simulate(country)
 
-    N = 10
-    difftimes = np.diff(np.array(times))
-    difftimes = np.convolve(difftimes, np.ones((N,)) / N, mode='valid')  # Smoothing
-    plt.plot(difftimes)
-    plt.title('Time per iteration.')
-    plt.show()
-    # %% Plotting
+# Plotting
+Plotter.plot_fatalities(result['R_dead'])
+plt.show()
 
-    Plotter.plot_SIR(pandemic_info)
+Plotter.plot_hospitalized_people(result['I_crit'], country.hospital_beds)
+plt.show()
 
-    Plotter.plot_each_group(pandemic_info)
+Plotter.plot_SIR(result)
+plt.show()
+
+Plotter.plot_each_group(result)
+plt.show()
 
 
-    # dette er en ændring
+### MULTIPLE SIMULATION
+result = repeat_simulate(country)
 
+Plotter.plot_intervals(result['R_dead'])
+plt.show()
 
 
 

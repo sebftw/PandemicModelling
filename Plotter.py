@@ -1,10 +1,13 @@
 import matplotlib.pyplot as plt
+import matplotlib
+from matplotlib import cm
+import numpy as np
 
-def plot_hospitalized_people(I_crit, hospital_beds, n_days):
+def plot_hospitalized_people(I_crit, hospital_beds):
     # %% Plotting
     fig, ax = plt.subplots(1, 1, figsize=(7,3))
     ax.plot(I_crit, c='lightskyblue', label=f'Hospitalized')
-    ax.hlines(hospital_beds, 0, n_days, label=f'Respirators')
+    ax.hlines(hospital_beds, *ax.get_xlim(), label=f'Respirators')
     ax.legend()
     ax.set_title('Number of hospitalized people')
     
@@ -42,6 +45,15 @@ def plot_each_group(PI):
     for i in range(len(ax)):
         for j in range(len(ax[i])):
             ax[i][j].legend()
-    plt.show()
 
-   
+def plot_intervals(y):
+    x = range(y.shape[-1])
+
+    plt.plot(x, np.median(y, axis=0))
+    n_intervals = y.shape[0] // 2  # n_repeats // 2.
+    norm = matplotlib.colors.Normalize(vmin=0, vmax=n_intervals)
+    for i in reversed(range(n_intervals)):
+        p = (i + 1) / n_intervals
+        plt.fill_between(x, *np.quantile(y, q=[0.5 - p / 2, 0.5 + p / 2], axis=0), color=cm.jet(norm(i)))
+
+
