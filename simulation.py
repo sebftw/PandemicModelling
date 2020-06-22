@@ -60,9 +60,10 @@ def simulate(country, n_days=365, progress_bar=True):
     country.initialize(n_days)  # Alternatively: copy.deepcopy(country)
 
     results = []
+    start = time.time()
     for t in tqdm(range(n_days), desc='Simulating pandemic', unit='day', disable=not progress_bar):
         pandemic_info = country.simulate_day(t)
-        pandemic_info['iter_time'] = time.time()
+        pandemic_info['iter_time'] = time.time()-start  # Add the current time.
         results.append(pandemic_info)
 
     return collate(results)
