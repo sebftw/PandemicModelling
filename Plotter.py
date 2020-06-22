@@ -16,6 +16,13 @@ plt.rc('ytick', labelsize=SMALL_SIZE)  # fontsize of the tick labels
 plt.rc('legend', fontsize=SMALL_SIZE)  # legend fontsize
 plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
+def collate(lst, axis=0, func=np.concatenate):
+    # A simple collate function:
+    return {key:func([sub[key] for sub in lst], axis=axis) for key in lst[-1].keys()}
+
+def reduce(dictonary, func=np.mean):
+    return {key:func(value) for key, value in dictonary.items()}
+
 
 def plot_hospitalized_people(I_crit, hospital_beds):
     # %% Plotting
@@ -36,7 +43,7 @@ def plot_fatalities(R_dead):
 def plot_SIR(pandemic_info, as_percentage = True):
     fig, ax = plt.subplots(1, 1, figsize=(12,8))
     S = pandemic_info["S"]
-    I = pandemic_info["I_inc"] + pandemic_info["I_symp"] + pandemic_info["I_no_symp"] + pandemic_info["I_crit"]
+    I = pandemic_info["I"]
     R = pandemic_info["R_dead"] + pandemic_info["R_surv"]
     death = pandemic_info["R_dead"]
     surv = pandemic_info["R_surv"]
@@ -73,11 +80,23 @@ def plot_each_group(PI):
 def plot_intervals(y):
     x = range(y.shape[-1])
 
-    plt.plot(x, np.median(y, axis=0))
-    n_intervals = y.shape[0] // 2  # n_repeats // 2.
-    norm = matplotlib.colors.Normalize(vmin=0, vmax=n_intervals)
-    for i in reversed(range(n_intervals)):
-        p = (i + 1) / n_intervals
-        plt.fill_between(x, *np.quantile(y, q=[0.5 - p / 2, 0.5 + p / 2], axis=0), color=cm.jet(norm(i)))
+    cmap = matplotlib.colors.LinearSegmentedColormap.from_list('custom',
+                                                               [(0, 'lime'), (0.5, '#EFFD6F'), (1, 'tomato')])  # cm.jet
+
+    plt.plot(x, np.median(y, axis=0), color='k', lw=0.5)
+    norm = matplotlib.colors.Normalize(vmin=0, vmax=100)
+    y.sort(0)
+    for i in reversed(range(len(y))):
+        p = i / (len(y) - 1) * 100
+        plt.fill_between(x, *y[[0, i], :], color=cmap(norm(p)))
+    cbar = plt.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap))
+    plt.legend(['median'], loc='best')
+    plt.xlabel('Day')
+
+    cbar.ax.get_yaxis().labelpad = 15
+    cbar.ax.set_ylabel('Risk', rotation=270)
+    cbar.ax.get_yaxis().set_major_formatter(mtick.PercentFormatter())
+    cbar.ax.plot([0, 100], [50] * 2, 'k-', lw=0.5)
+
 
 

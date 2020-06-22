@@ -1,38 +1,39 @@
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 from Country import Country
 import Plotter
 import time
 from tqdm import tqdm
+from Plotter import collate, reduce
+from multiprocessing import Pool
 import copy
 
 from Region import Region
 from Sampler import Sampler
 import pandas as pd
 
-population_size = 5_000_000  # 5_000_000
-I_initial = 1
-hospital_beds = 750
+np.random.seed(7)
+population_size = 50_000  # 5_000_000
+I_initial = 50
+hospital_beds = population_size * 0.007
 SIR = False
 plot_data = True
 
 if SIR:
     sampler = Sampler( ####### SIR ###########
-        avg_people_met=5
+        avg_people_met_pr_day=6.86
         , contagion_prob=0.04
         , crit_prob=0.0 # DONT CHANGE (0)
-        , death_prob=1.0 # UNUSED
-        , symp_prob=1.0 # DONT CHANGE (1)
-        , fraction_symp_out = 0.5 
-    
-        #, avg_time_inc=0.0 # DONT CHANGE (0)
-        #, avg_time_symp=7.5 # UNUSED
-        #, avg_time_no_symp=7.5 
-        , avg_time_crit=10 #UNUSED
+        , symp_prob=1.0  # DONT CHANGE (1)
+        , fraction_symp_out = 1.0
+        , avg_time_symp = None
+        # We get an R0 of 5*4.080*0.04 = 1.5
     )
 else:
     sampler = Sampler( ###### EXTENDED SIR ##########
-        avg_people_met=20
+        avg_people_met_pr_day=6.86
         , contagion_prob=0.04
         , crit_prob=0.03
         , death_prob=0.22
@@ -47,68 +48,115 @@ else:
 
 
 
-n_days = 100 # Indæmningsfasen
-
-
-def collate(results, axis=0):
-    d = {}
-    for k in results[0].keys():
-        d[k] = np.stack(list(d[k] for d in results), axis=axis)
-    return d
+n_days = 100  # Indæmningsfasen
 
 def simulate(country, n_days=365, progress_bar=True):
     country.initialize(n_days)  # Alternatively: copy.deepcopy(country)
 
     results = []
+    control_variates = []
     start = time.time()
     for t in tqdm(range(n_days), desc='Simulating pandemic', unit='day', disable=not progress_bar):
-        pandemic_info = country.simulate_day(t)
-        pandemic_info['iter_time'] = time.time()-start  # Add the current time.
+        pandemic_info, control_variate = country.simulate_day(t)
+        pandemic_info['iter_time'] = np.array([time.time()-start])  # Add the current time.
+
         results.append(pandemic_info)
+        control_variates.append(control_variate)
+    # Concatenate daily results into arrays.
+    results = collate(results)
 
-    return collate(results)
+    # We want this indicator to be 1 if there is ever overcapacity.
+    results['overcapacity'] = np.any(results['I_crit'] > country.hospital_beds)
 
-def repeat_simulate(country, n_repeats=50, n_days=365):
+    # Add control variates.
+    control_variates = reduce(collate(control_variates))
+    results.update(control_variates)
+
+    return results
+
+
+def repeat_simulate(country, n_repeats=50, n_days=365, multiprocessing=False):
+    if multiprocessing:
+        print('Using multiprocessing with', os.cpu_count(), 'workers.')
+        pool = Pool(os.cpu_count())
+        return collate(pool.starmap(simulate, [(country, n_days, False)] * n_repeats), func=np.stack)
+
     results = []
     for _ in tqdm(range(n_repeats), desc='Repeating simulations', unit='simulations'):
         results.append(simulate(country, n_days, False))
-    return collate(results)
+    results = collate(results, func=np.stack)
 
-### SINGLE SIMULATION
-copenhagen = Region('Copenhagen', population_size, sampler, I_initial)
-country = Country([copenhagen], hospital_beds, n_days)
-result = simulate(country)
+    return results
 
-if plot_data:
-    # %% Plotting
+
+if __name__ == "__main__":
+    ### SINGLE SIMULATION
+    copenhagen = Region('Copenhagen', population_size, sampler, I_initial)
+    country = Country([copenhagen], hospital_beds)
+    result = simulate(country)
+
+    if plot_data:
+        # %% Plotting
+        Plotter.plot_fatalities(result['R_dead'])
+        plt.show()
+
+        if SIR:
+            sick_people_on_hospital_fraction = 0.1
+            Plotter.plot_hospitalized_people(result['I_symp']*sick_people_on_hospital_fraction, hospital_beds)
+        else:
+            Plotter.plot_hospitalized_people(result['I_crit'], hospital_beds)
+        plt.show()
+
+    # Plotting
     Plotter.plot_fatalities(result['R_dead'])
     plt.show()
 
-    if SIR:
-        sick_people_on_hospital_fraction = 0.1
-        Plotter.plot_hospitalized_people(result['I_symp']*sick_people_on_hospital_fraction, hospital_beds)
-    else:
-        Plotter.plot_hospitalized_people(result['I_crit'], hospital_beds)
+    Plotter.plot_hospitalized_people(result['I_crit'], country.hospital_beds)
     plt.show()
 
-# Plotting
-Plotter.plot_fatalities(result['R_dead'])
-plt.show()
+    Plotter.plot_SIR(result)
+    plt.show()
 
-Plotter.plot_hospitalized_people(result['I_crit'], country.hospital_beds)
-plt.show()
-
-Plotter.plot_SIR(result)
-plt.show()
-
-Plotter.plot_each_group(result)
-plt.show()
+    Plotter.plot_each_group(result)
+    plt.show()
 
 
-### MULTIPLE SIMULATION
-result = repeat_simulate(country)
-Plotter.plot_intervals(result['R_dead'])
-plt.show()
+    ### MULTIPLE SIMULATION
+    result = repeat_simulate(country)
+    Plotter.plot_intervals(result['I'])
+    plt.title('# of infected (I)')
+    plt.show()
+
+    # Plotter.plot_intervals(result['R_dead'])
+    # plt.title('# of dead')
+    # plt.show()
+
+    Plotter.plot_intervals(result['R'])
+    plt.title('R')
+    plt.show()
+
+
+    Plotter.plot_intervals(result['I_crit'])
+    plt.title('# Hospitalized (I_crit)')
+    plt.hlines(country.hospital_beds, *plt.xlim(), linestyles='dashed', label=f'Respirators')
+    plt.show()
+
+    def control(x, control_variable, mu_control=None):
+        # mu_control = np.mean(control_variable)
+        # fx = f(x)
+        variances = np.cov(x, control_variable)
+        c = -variances[0, 1] / variances[1, 1]
+        return x + c * (control_variable - mu_control)
+
+
+    # TODO: Try other controls such as time of sickness
+    print(result['overcapacity'].mean(), result['overcapacity'].var())
+    control_overcapacity = control(result['overcapacity'], result['incubation_times'], 5.937273374)
+    print('incubation times control:', control_overcapacity.mean(), control_overcapacity.var())
+
+    control_overcapacity = control(result['overcapacity'], result['symptom_times'], 4.674162489)
+    print('symptom times control:', control_overcapacity.mean(), control_overcapacity.var())
+
 
 
 

@@ -2,31 +2,30 @@ import numpy as np
 from collections import Counter
 
 class Sampler:
-
-    def __init__(self, avg_people_met=4,
+    def __init__(self, avg_people_met_pr_day=6.86,
                  contagion_prob=0.05, crit_prob=0.2,
                  death_prob=0.22, symp_prob=1, fraction_symp_out=0.5,
-                 avg_time_inc=5, avg_time_symp=7.5, avg_time_no_symp=7.5,
+                 avg_time_inc=np.exp(1.57+0.65**2/2)-0.493352799, avg_time_symp=7.5, avg_time_no_symp=7.5,
                  avg_time_crit=9):
-        self.avg_people_met = avg_people_met
+        self.avg_people_met_pr_day = avg_people_met_pr_day
         self.contagion_prob = contagion_prob
         self.crit_prob = crit_prob
         self.death_prob = death_prob
         self.symp_prob = symp_prob
         self.fraction_symp_out = fraction_symp_out
         self.avg_time_inc = avg_time_inc
-        self.avg_time_symp = avg_time_symp
-        self.avg_time_no_symp = avg_time_no_symp
+        self.avg_time_symp = np.exp(1.23+0.79**2/2)-0.493352799
         self.avg_time_crit = avg_time_crit
 
         ## TESTING
         self.time_spent_in = 0
-    
+
+
     def get_new_infected(self, I_no_symp, S, I_symp, R_surv):
         I = I_no_symp + I_symp*self.fraction_symp_out
         n_meetable = I + S + R_surv
 
-        total_S_people_met = np.random.poisson(I*self.avg_people_met * (S / n_meetable))
+        total_S_people_met = np.random.poisson(I * self.avg_people_met_pr_day * (S / n_meetable))
 
         # S_people_met = np.random.randint(0, S, size=total_S_people_met)  # -1
         S_people_met = np.floor(np.random.uniform(size=total_S_people_met) * S)
@@ -41,10 +40,10 @@ class Sampler:
 
     def sample_incubation_times(self, new_infected):
         if self.avg_time_inc == 0:
-            inc_times = np.zeros(new_infected).astype(int)
+            inc_times = np.zeros(new_infected)
         else:
             #inc_times = np.random.gamma(self.avg_time_inc, 1, size=new_infected).astype(int)
-            inc_times = np.random.lognormal(1.57, 0.65, size=new_infected).astype(int)
+            inc_times = np.random.lognormal(1.57, 0.65, size=new_infected)
 
         return inc_times
             
@@ -55,12 +54,12 @@ class Sampler:
     
     def sample_symptom_times(self, n_symp):
         #symp_times = np.random.gamma(self.avg_time_symp/0.8, 0.8, size=n_symp).astype(int)
-        symp_times = np.random.lognormal(1.23, 0.79, size=n_symp).astype(int)
+        symp_times = np.random.lognormal(1.23, 0.79, size=n_symp)
         return symp_times
         
     def sample_no_symptom_times(self, n_no_symp):
         #no_symp_times = np.random.gamma(self.avg_time_no_symp/0.8, 0.8, size=n_no_symp).astype(int)
-        no_symp_times = np.random.lognormal(1.23, 0.79, size=n_no_symp).astype(int)
+        no_symp_times = np.random.lognormal(1.23, 0.79, size=n_no_symp)
         return no_symp_times
     
     def cointoss_symp(self, n_transition_symp):
@@ -69,7 +68,7 @@ class Sampler:
         return n_crit, n_surv
     
     def sample_critical_times(self, n_crit):
-        crit_times = np.random.gamma(self.avg_time_crit/0.8, 0.8, size=n_crit).astype(int)
+        crit_times = np.random.gamma(self.avg_time_crit/0.8, 0.8, size=n_crit)
         return crit_times
             
     def cointoss_crit(self, n_transition_crit):
