@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib import cm
+import matplotlib.ticker as mtick
 import numpy as np
 
 SMALL_SIZE = 14
@@ -32,28 +33,38 @@ def plot_fatalities(R_dead):
     ax.set_title('Total fatalities')
 
 
-def plot_SIR(pandemic_info):
-    fig, ax = plt.subplots(1, 1, figsize=(7,3))
+def plot_SIR(pandemic_info, as_percentage = True):
+    fig, ax = plt.subplots(1, 1, figsize=(12,8))
     S = pandemic_info["S"]
     I = pandemic_info["I_inc"] + pandemic_info["I_symp"] + pandemic_info["I_no_symp"] + pandemic_info["I_crit"]
     R = pandemic_info["R_dead"] + pandemic_info["R_surv"]
+    death = pandemic_info["R_dead"]
+    surv = pandemic_info["R_surv"]
     
-    ax.plot(S, c='lightskyblue', label=f'S')
-    ax.plot(I, c='darksalmon', label=f'I')
-    ax.plot(R, c='darkslategray', label=f'R')
+    if as_percentage:
+        sum_SIR = (S+I+R)/100
+        S, I, death, surv = S/sum_SIR, I/sum_SIR, death/sum_SIR, surv/sum_SIR
+        ax.yaxis.set_major_formatter(mtick.PercentFormatter())
+
+    
+    #ax.plot(S, c='lightskyblue', label=f'S')
+    #ax.plot(I, c='darksalmon', label=f'I')
+    #ax.plot(R, c='darkslategray', label=f'R')
+    ax.stackplot(list(range(len(R))), I, S, death, surv, colors=["darksalmon", "darkslategray", "red", "lightskyblue"] ,labels=["I", "S", "Dead", "Surv"])
     ax.legend()
 
 
 def plot_each_group(PI):
     fig, ax = plt.subplots(4, 2, figsize=(15,15))
     
-    ax[0][0].plot(PI["S"],  c='lightskyblue', label=f'S',)
-    ax[0][1].plot(PI["I_inc"], c='darksalmon', label=f'I_inc')
-    ax[1][0].plot(PI["I_symp"], c='darksalmon', label=f'I_symp')
-    ax[1][1].plot(PI["I_no_symp"], c='darksalmon', label=f'I_no_symp')
-    ax[2][0].plot(PI["I_crit"], c='darksalmon', label=f'I_crit')
-    ax[2][1].plot(PI["R_surv"], c='darkslategray', label=f'R_surv')
-    ax[3][0].plot(PI["R_dead"], c='darkslategray', label=f'R_dead')
+    x = np.arange(len(PI["S"]))
+    ax[0][0].plot(x, PI["S"],  color='lightskyblue', label=f'S')
+    ax[0][1].bar(x, PI["I_inc"], color='darksalmon', label=f'I_inc')
+    ax[1][0].bar(x, PI["I_symp"], color='darksalmon', label=f'I_symp')
+    ax[1][1].bar(x, PI["I_no_symp"], color='darksalmon', label=f'I_no_symp')
+    ax[2][0].bar(x, PI["I_crit"], color='darksalmon', label=f'I_crit')
+    ax[2][1].plot(x, PI["R_surv"], color='darkslategray', label=f'R_surv')
+    ax[3][0].plot(x, PI["R_dead"], color='darkslategray', label=f'R_dead')
     ax[3][1].remove()
     for i in range(len(ax)):
         for j in range(len(ax[i])):

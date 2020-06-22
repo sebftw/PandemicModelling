@@ -10,20 +10,25 @@ from Region import Region
 from Sampler import Sampler
 import pandas as pd
 
+<<<<<<< HEAD
 population_size = 5_000  # 5_000_000
 I_initial = 500
+=======
+population_size = 5_000_000  # 5_000_000
+I_initial = 1
+>>>>>>> d5171960b3530654d7639c51e68a2412d40dff80
 hospital_beds = 750
 SIR = False
 plot_data = True
 
 if SIR:
-    sampler = Sampler(
+    sampler = Sampler( ####### SIR ###########
         avg_people_met=5
         , contagion_prob=0.04
         , crit_prob=0.0 # DONT CHANGE (0)
         , death_prob=1.0 # UNUSED
         , symp_prob=1.0 # DONT CHANGE (1)
-        , fraction_symp_out = 0.8
+        , fraction_symp_out = 0.5 
     
         #, avg_time_inc=0.0 # DONT CHANGE (0)
         #, avg_time_symp=7.5 # UNUSED
@@ -31,13 +36,13 @@ if SIR:
         , avg_time_crit=10 #UNUSED
     )
 else:
-    sampler = Sampler(
-        avg_people_met=5
+    sampler = Sampler( ###### EXTENDED SIR ##########
+        avg_people_met=20
         , contagion_prob=0.04
-        , crit_prob=0.2
+        , crit_prob=0.03
         , death_prob=0.22
-        , symp_prob=0.2
-        , fraction_symp_out=0.1
+        , symp_prob=0.9
+        , fraction_symp_out=0.3
     
         #, avg_time_inc=5
         #, avg_time_symp=7.5
@@ -47,7 +52,7 @@ else:
 
 
 
-n_days = 365
+n_days = 100 # Indæmningsfasen
 
 
 def collate(results, axis=0):
