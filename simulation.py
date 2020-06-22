@@ -10,13 +10,8 @@ from Region import Region
 from Sampler import Sampler
 import pandas as pd
 
-<<<<<<< HEAD
-population_size = 5_000  # 5_000_000
-I_initial = 500
-=======
 population_size = 5_000_000  # 5_000_000
 I_initial = 1
->>>>>>> d5171960b3530654d7639c51e68a2412d40dff80
 hospital_beds = 750
 SIR = False
 plot_data = True
