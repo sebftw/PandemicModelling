@@ -134,4 +134,3 @@ dmypy.json
 # Project stuff
 figures/
 /data/.DS_Store
-distributions.py
