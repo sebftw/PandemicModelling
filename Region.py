@@ -2,11 +2,12 @@ import numpy as np
 
 class Region:
     control_variates = ['incubation_times', 'symptom_times', 'no_symptom_times']
-    def __init__(self, name, population_size, sampler, I_initial):
+    def __init__(self, name, population_size, sampler, I_initial, cyclical=False):
         self.name = name
         self.population_size = population_size
         self.sampler = sampler
         self.I_initial = I_initial
+        self.cyclical = cyclical
 
     def initialize(self, n_days):
         self.transition_inc = np.zeros(n_days, dtype=np.int)
@@ -22,6 +23,7 @@ class Region:
         self.R_dead = 0
         self.R_surv = 0
 
+        self.new_infections = 0
         # At day 0, we initialize. I.e. we set the incubation times for the initial infected.
         # inc_times = self.sampler.sample_incubation_times(self.I_inc)
         # self.increment_array(self.transition_inc, inc_times)
@@ -45,12 +47,21 @@ class Region:
             self.R_surv
         )
 
+        self.new_infections = new_infected
+
         if self.ready:
             new_infected += self.I_initial
             self.ready = False
 
         self.S -= new_infected
         self.I_inc += new_infected
+
+        # Cyclical/periodic pattern of infection.
+        if self.cyclical:
+            if self.I_crit > self.population_size*0.0005 and self.sampler.avg_people_met_pr_day == 6.86:
+                self.sampler.avg_people_met_pr_day = self.cyclical
+            if self.I_crit <= self.population_size*0.00035 and self.sampler.avg_people_met_pr_day == self.cyclical:
+                self.sampler.avg_people_met_pr_day = 6.86
 
         control_variates['incubation_times'] = self.sampler.sample_incubation_times(new_infected)
         self.increment_array(self.transition_inc, control_variates['incubation_times'])
@@ -64,7 +75,7 @@ class Region:
         self.I_no_symp += n_no_symp
 
         control_variates['symptom_times'] = self.sampler.sample_symptom_times(n_symp)
-        control_variates['no_symptom_times'] = self.sampler.sample_no_symptom_times(n_no_symp)
+        control_variates['no_symptom_times'] = self.sampler.sample_symptom_times(n_no_symp)
 
         self.increment_array(self.transition_symp, control_variates['symptom_times'])
         self.increment_array(self.transition_no_symp, control_variates['no_symptom_times'])

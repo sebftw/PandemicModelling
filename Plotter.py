@@ -40,11 +40,13 @@ def plot_fatalities(R_dead):
     ax.set_title('Total fatalities')
 
 
-def plot_SIR(pandemic_info, as_percentage = True):
-    fig, ax = plt.subplots(1, 1, figsize=(12,8))
+def plot_SIR(pandemic_info, as_percentage=True, stack=True, ax=None):
+    if ax is None:
+        fig, ax = plt.subplots(1, 1, figsize=(12, 8))
+
     S = pandemic_info["S"]
     I = pandemic_info["I"]
-    R = pandemic_info["R_dead"] + pandemic_info["R_surv"]
+    R = pandemic_info["R"]
     death = pandemic_info["R_dead"]
     surv = pandemic_info["R_surv"]
     
@@ -53,12 +55,13 @@ def plot_SIR(pandemic_info, as_percentage = True):
         S, I, death, surv = S/sum_SIR, I/sum_SIR, death/sum_SIR, surv/sum_SIR
         ax.yaxis.set_major_formatter(mtick.PercentFormatter())
 
-    
-    #ax.plot(S, c='lightskyblue', label=f'S')
-    #ax.plot(I, c='darksalmon', label=f'I')
-    #ax.plot(R, c='darkslategray', label=f'R')
-    ax.stackplot(list(range(len(R))), I, S, death, surv, colors=["darksalmon", "darkslategray", "red", "lightskyblue"] ,labels=["I", "S", "Dead", "Surv"])
-    ax.legend()
+    labels = ["I", "S", "Surv", "Dead"]
+    colors = ["darksalmon", "darkslategray", "lightskyblue", "red"]
+    if stack:
+        ax.stackplot(list(range(len(S))), I, S, surv, death, colors=colors, labels=labels)
+    else:
+        for S, label, color in zip([I, S, surv, death], labels, colors):
+            ax.plot(S, c=color, label=label)
 
 
 def plot_each_group(PI):
@@ -89,7 +92,7 @@ def plot_intervals(y):
     for i in reversed(range(len(y))):
         p = i / (len(y) - 1) * 100
         plt.fill_between(x, *y[[0, i], :], color=cmap(norm(p)))
-    cbar = plt.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap))
+    cbar = plt.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap.reversed() ))
     plt.legend(['median'], loc='best')
     plt.xlabel('Day')
 

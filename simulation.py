@@ -17,7 +17,7 @@ import pandas as pd
 np.random.seed(7)
 population_size = 50_000  # 5_000_000
 I_initial = 50
-hospital_beds = population_size * 0.007
+hospital_beds = population_size * 0.0078
 SIR = False
 plot_data = True
 
@@ -28,22 +28,17 @@ if SIR:
         , crit_prob=0.0 # DONT CHANGE (0)
         , symp_prob=1.0  # DONT CHANGE (1)
         , fraction_symp_out = 1.0
-        , avg_time_symp = None
-        # We get an R0 of 5*4.080*0.04 = 1.5
+        , incubation=False
+        # We get an R0 of 6.86*4.67416*0.04 = 1.28259
     )
 else:
     sampler = Sampler( ###### EXTENDED SIR ##########
         avg_people_met_pr_day=6.86
         , contagion_prob=0.04
         , crit_prob=0.03
-        , death_prob=0.22
+        , death_prob=1-0.78
         , symp_prob=0.9
         , fraction_symp_out=0.3
-    
-        #, avg_time_inc=5
-        #, avg_time_symp=7.5
-        #, avg_time_no_symp=7.5
-        , avg_time_crit=10
     )
 
 
@@ -75,7 +70,7 @@ def simulate(country, n_days=365, progress_bar=True):
     return results
 
 
-def repeat_simulate(country, n_repeats=50, n_days=365, multiprocessing=False):
+def repeat_simulate(country, n_repeats=30, n_days=365, multiprocessing=False):
     if multiprocessing:
         print('Using multiprocessing with', os.cpu_count(), 'workers.')
         pool = Pool(os.cpu_count())
@@ -89,7 +84,11 @@ def repeat_simulate(country, n_repeats=50, n_days=365, multiprocessing=False):
     return results
 
 
+
+
 if __name__ == "__main__":
+    scenario1()
+    exit()
     ### SINGLE SIMULATION
     copenhagen = Region('Copenhagen', population_size, sampler, I_initial)
     country = Country([copenhagen], hospital_beds)
@@ -107,21 +106,23 @@ if __name__ == "__main__":
             Plotter.plot_hospitalized_people(result['I_crit'], hospital_beds)
         plt.show()
 
-    # Plotting
-    Plotter.plot_fatalities(result['R_dead'])
-    plt.show()
+        # Plotting
+        Plotter.plot_fatalities(result['R_dead'])
+        plt.show()
 
-    Plotter.plot_hospitalized_people(result['I_crit'], country.hospital_beds)
-    plt.show()
+        Plotter.plot_hospitalized_people(result['I_crit'], country.hospital_beds)
+        plt.show()
 
-    Plotter.plot_SIR(result)
-    plt.show()
+        Plotter.plot_SIR(result)
+        plt.show()
 
-    Plotter.plot_each_group(result)
-    plt.show()
+        Plotter.plot_each_group(result)
+        plt.show()
 
 
     ### MULTIPLE SIMULATION
+    copenhagen = Region('Copenhagen', population_size, sampler, I_initial)  # cyclical=3
+    country = Country([copenhagen], hospital_beds)
     result = repeat_simulate(country)
     Plotter.plot_intervals(result['I'])
     plt.title('# of infected (I)')
@@ -131,10 +132,10 @@ if __name__ == "__main__":
     # plt.title('# of dead')
     # plt.show()
 
-    Plotter.plot_intervals(result['R'])
-    plt.title('R')
+    Plotter.plot_intervals(result['R'] / copenhagen.population_size)
+    plt.ylim([0, 1])
+    plt.title('R / population size')
     plt.show()
-
 
     Plotter.plot_intervals(result['I_crit'])
     plt.title('# Hospitalized (I_crit)')
@@ -145,32 +146,21 @@ if __name__ == "__main__":
         # mu_control = np.mean(control_variable)
         # fx = f(x)
         variances = np.cov(x, control_variable)
+
+        # print('Control correlation:', np.corrcoef(x, control_variable)[1, 0])
         c = -variances[0, 1] / variances[1, 1]
         return x + c * (control_variable - mu_control)
 
 
     # TODO: Try other controls such as time of sickness
     print(result['overcapacity'].mean(), result['overcapacity'].var())
-    control_overcapacity = control(result['overcapacity'], result['incubation_times'], 5.937273374)
+    control_overcapacity = control(result['overcapacity'], result['incubation_times'], sampler.avg_time_inc)  # 5.937273374
     print('incubation times control:', control_overcapacity.mean(), control_overcapacity.var())
 
-    control_overcapacity = control(result['overcapacity'], result['symptom_times'], 4.674162489)
+    control_overcapacity = control(result['overcapacity'], result['symptom_times'], sampler.avg_time_symp) # 4.674162489
     print('symptom times control:', control_overcapacity.mean(), control_overcapacity.var())
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    # Estimate, how this overcapacity changes as a function of parameters.
+    # E.g. use subplots with different parameter settings, and then show all the development quantiles.
 
 
