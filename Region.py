@@ -1,7 +1,8 @@
 import numpy as np
 
 class Region:
-    control_variates = ['incubation_times', 'symptom_times', 'no_symptom_times']
+    control_variates = ['incubation_times', 'symptom_times', 'no_symptom_times', 'critical_times',
+                        'symp_rate', 'crit_rate', 'death_rate']
     def __init__(self, name, population_size, sampler, I_initial, cyclical=False):
         self.name = name
         self.population_size = population_size
@@ -85,7 +86,7 @@ class Region:
 
         self.increment_array(self.transition_symp, control_variates['symptom_times'])
         self.increment_array(self.transition_no_symp, control_variates['no_symptom_times'])
-
+        control_variates['symp_rate'] = np.array([0] * n_no_symp + [1] * n_symp)
         
         # I_symp to I_crit/R_surv
         n_transition_symp = self.transition_symp[0]
@@ -95,8 +96,10 @@ class Region:
         self.I_crit += n_crit
         self.R_surv += n_surv
 
-        self.increment_array(self.transition_crit,
-                             self.sampler.sample_critical_times(n_crit))
+        control_variates['critical_times'] = self.sampler.sample_critical_times(n_crit)
+        self.increment_array(self.transition_crit, control_variates['critical_times'])
+        control_variates['crit_rate'] = np.array([0] * n_surv + [1] * n_crit)
+
 
         # I_no_symp to R_surv
         n_surv = self.transition_no_symp[0]
@@ -111,6 +114,8 @@ class Region:
         self.I_crit -= (n_dead + n_surv)  # = n_transition_crit
         self.R_dead += n_dead
         self.R_surv += n_surv
+
+        control_variates['death_rate'] = np.array([0] * n_surv + [1] * n_dead)
 
         # Increment transition arrays
         self.transition_inc = self.transition_inc[1:]

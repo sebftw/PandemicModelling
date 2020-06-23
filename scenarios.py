@@ -7,6 +7,8 @@ import Plotter
 import time
 from tqdm import tqdm
 import matplotlib.ticker as mtick
+import math
+import scipy.stats as stats
 from Plotter import collate, reduce
 from multiprocessing import Pool
 import copy
@@ -28,6 +30,7 @@ def scenario1():
                       fraction_symp_out=1.0, incubation=False)
     # We have S -> I_symp -> R
     # We get an R0 of 6.86*4.67416*0.04 = 1.28259
+    # (Only true for memoryless? i.e. because we can just multiply by avg. sympt time.)
 
     population_size = 500_000
     I_initial = 5_000
@@ -274,6 +277,66 @@ def scenario4():
     plt.savefig(os.path.join(plot_path, '4_DEATH_deaths.png'), dpi=300)
     plt.show()
 
+
+def scenario5():
+    # Control variables
+    np.random.seed(7)
+    sampler = Sampler()  # (symp_prob=0.98, crit_prob=0.98, death_prob=0.1)
+    n_days = 50
+    population_size = 5_000
+    I_initial = 100
+    copenhagen = Region('Copenhagen', population_size, sampler, I_initial)
+    country = Country([copenhagen])
+
+    np.random.seed(7)
+    result = simulate(country, n_days=n_days)
+    Plotter.plot_SIR(result)
+    plt.legend()
+    plt.xlabel('Days')
+    plt.tight_layout()
+    plt.savefig(os.path.join(plot_path, '5_CONTROL.png'), dpi=300)
+    plt.show()
+
+    np.random.seed(7)
+    result = repeat_simulate(country, n_repeats=n_repeats, n_days=n_days)
+    Plotter.plot_intervals(result['R_dead'].copy(), plot_median=False)
+    plt.plot(result['R_dead'][0], '--k', label='Example path', lw=0.5)
+    plt.xlabel('Days')
+    plt.ylabel('# Dead')
+    # plt.hlines(copenhagen.population_size * 0.0005, *plt.xlim())
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(os.path.join(plot_path, '5_CONTROL_DEATH.png'), dpi=300)
+    plt.show()
+
+    def control(x, control_variable, mu_control=None):
+        # mu_control = np.mean(control_variable)
+        # fx = f(x)
+        variances = np.cov(x, control_variable)
+
+        # print('Control correlation:', np.corrcoef(x, control_variable)[1, 0])
+        c = -variances[0, 1] / variances[1, 1]
+        return x + c * (control_variable - mu_control)
+
+    def confidence_interval(sample):
+        mean, var, _ = stats.bayes_mvs(sample)
+        return dict(x=mean.statistic, xerr=mean.minmax[1] - mean.statistic)
+
+    x = 'max_R_dead'
+    plt.errorbar(y=-1, **confidence_interval(result[x]), lw=1, fmt='o', capsize=10)
+
+    for i, (control_var, mu) in enumerate(
+            zip(Region.control_variates, [sampler.avg_time_inc, sampler.avg_time_symp, sampler.avg_time_symp,
+                                          sampler.avg_time_crit, sampler.symp_prob, sampler.crit_prob,
+                                          sampler.death_prob])):
+        control_result = control(result[x], result[control_var], mu)
+        plt.errorbar(y=i, **confidence_interval(control_result), lw=1, fmt='o', capsize=10, label=control_var)
+    plt.yticks(range(-1, len(Region.control_variates)), labels=['Without control'] + Region.control_variates)
+
+    plt.savefig(os.path.join(plot_path, '5_CONTROL_DEATH_control.png'), dpi=300)
+    plt.show()
+
+    pass
 
 
 

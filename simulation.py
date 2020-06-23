@@ -60,6 +60,8 @@ def simulate(country, n_days=365, progress_bar=True):
 
     # We want this indicator to be 1 if there is ever overcapacity.
     results['overcapacity'] = np.any(results['I_crit'] > country.hospital_beds)
+    for key in pandemic_info:
+        results['max_' + key] = results[key].max(0)
 
     # Add control variates.
     control_variates = reduce(collate(control_variates))
@@ -112,47 +114,6 @@ if __name__ == "__main__":
 
         Plotter.plot_each_group(result)
         plt.show()
-
-
-    ### MULTIPLE SIMULATION
-    copenhagen = Region('Copenhagen', population_size, sampler, I_initial)  # cyclical=3
-    country = Country([copenhagen], hospital_beds)
-    result = repeat_simulate(country)
-    Plotter.plot_intervals(result['I'])
-    plt.title('# of infected (I)')
-    plt.show()
-
-    # Plotter.plot_intervals(result['R_dead'])
-    # plt.title('# of dead')
-    # plt.show()
-
-    Plotter.plot_intervals(result['R'] / copenhagen.population_size)
-    plt.ylim([0, 1])
-    plt.title('R / population size')
-    plt.show()
-
-    Plotter.plot_intervals(result['I_crit'])
-    plt.title('# Hospitalized (I_crit)')
-    plt.hlines(country.hospital_beds, *plt.xlim(), linestyles='dashed', label=f'Respirators')
-    plt.show()
-
-    def control(x, control_variable, mu_control=None):
-        # mu_control = np.mean(control_variable)
-        # fx = f(x)
-        variances = np.cov(x, control_variable)
-
-        # print('Control correlation:', np.corrcoef(x, control_variable)[1, 0])
-        c = -variances[0, 1] / variances[1, 1]
-        return x + c * (control_variable - mu_control)
-
-
-    # TODO: Try other controls such as time of sickness
-    print(result['overcapacity'].mean(), result['overcapacity'].var())
-    control_overcapacity = control(result['overcapacity'], result['incubation_times'], sampler.avg_time_inc)  # 5.937273374
-    print('incubation times control:', control_overcapacity.mean(), control_overcapacity.var())
-
-    control_overcapacity = control(result['overcapacity'], result['symptom_times'], sampler.avg_time_symp) # 4.674162489
-    print('symptom times control:', control_overcapacity.mean(), control_overcapacity.var())
 
     # Estimate, how this overcapacity changes as a function of parameters.
     # E.g. use subplots with different parameter settings, and then show all the development quantiles.
