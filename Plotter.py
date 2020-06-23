@@ -83,21 +83,23 @@ def plot_each_group(PI):
             ax[i][j].legend()
 
 
-def plot_intervals(y):
+def plot_intervals(y, ax=None):
+    if ax is None:
+        fig, ax = plt.subplots(1, 1, figsize=(12, 8))
     x = range(y.shape[-1])
 
     cmap = matplotlib.colors.LinearSegmentedColormap.from_list('custom',
                                                                [(0, 'lime'), (0.5, '#EFFD6F'), (1, 'tomato')])  # cm.jet
 
-    plt.plot(x, np.median(y, axis=0), color='k', lw=0.5)
+    ax.plot(x, np.median(y, axis=0), color='k', lw=0.5)
     norm = matplotlib.colors.Normalize(vmin=0, vmax=100)
     y.sort(0)
     for i in reversed(range(len(y))):
         p = i / (len(y) - 1) * 100
-        plt.fill_between(x, *y[[0, i], :], color=cmap(norm(p)))
-    cbar = plt.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap.reversed() ))
-    plt.legend(['median'], loc='best')
-    plt.xlabel('Day')
+        ax.fill_between(x, *y[[0, i], :], color=cmap(norm(p)))
+    cbar = plt.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap.reversed()), ax=ax)
+    # ax.legend(['median'], loc='best')
+    ax.set_xlabel('Day')
 
     cbar.ax.get_yaxis().labelpad = 15
     cbar.ax.set_ylabel('Risk', rotation=270)
