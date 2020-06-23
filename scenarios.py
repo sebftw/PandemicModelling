@@ -306,7 +306,7 @@ def scenario5():
     # plt.hlines(copenhagen.population_size * 0.0005, *plt.xlim())
     plt.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(plot_path, '5_CONTROL_DEATH.png'), dpi=300)
+    plt.savefig(os.path.join(plot_path, '5_CONTROL_DEATH_2500.png'), dpi=300)
     plt.show()
 
     def control(x, control_variable, mu_control=None):
@@ -341,4 +341,8 @@ def scenario5():
 
 
 if __name__ == "__main__":
+    #scenario1()
+    #scenario2()
+    #scenario3()
+    #scenario4()
     scenario5()
