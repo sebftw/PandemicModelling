@@ -39,6 +39,7 @@ def scenario1():
         Plotter.plot_SIR(result, ax=ax)
         ax.set_title(f'$p={contageon_prob:.2f}$')
         ax.set_xlabel('Days')
+    ax.set_xlabel('')
     ax.legend(['S', 'I', 'R'], loc='upper center', bbox_to_anchor=(0.5, -0.17), fancybox=False, shadow=False, ncol=3)
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     # fig.legend(['S', 'I', 'R'], bbox_to_anchor=(2, 0), loc='lower right')
