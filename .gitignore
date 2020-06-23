@@ -130,3 +130,7 @@ dmypy.json
 
 # PyCharm project settings
 .idea/
+
+# Project stuff
+figures/
+/data/.DS_Store

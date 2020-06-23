@@ -41,8 +41,6 @@ else:
         , fraction_symp_out=0.3
     )
 
-
-
 n_days = 100  # Indæmningsfasen
 
 def simulate(country, n_days=365, progress_bar=True):
@@ -84,11 +82,7 @@ def repeat_simulate(country, n_repeats=30, n_days=365, multiprocessing=False):
     return results
 
 
-
-
 if __name__ == "__main__":
-    scenario1()
-    exit()
     ### SINGLE SIMULATION
     copenhagen = Region('Copenhagen', population_size, sampler, I_initial)
     country = Country([copenhagen], hospital_beds)
@@ -162,5 +156,3 @@ if __name__ == "__main__":
 
     # Estimate, how this overcapacity changes as a function of parameters.
     # E.g. use subplots with different parameter settings, and then show all the development quantiles.
-
-

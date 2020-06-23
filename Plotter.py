@@ -26,15 +26,15 @@ def reduce(dictonary, func=np.mean):
 
 def plot_hospitalized_people(I_crit, hospital_beds):
     # %% Plotting
-    fig, ax = plt.subplots(1, 1, figsize=(7,3))
+    fig, ax = plt.subplots(1, 1, figsize=(7, 3))
     ax.plot(I_crit, c='lightskyblue', label=f'Hospitalized')
     ax.hlines(hospital_beds, *ax.get_xlim(), label=f'Respirators')
     ax.legend()
     ax.set_title('Number of hospitalized people')
-    
-    
+
+
 def plot_fatalities(R_dead):
-    fig, ax = plt.subplots(1, 1, figsize=(7,3))
+    fig, ax = plt.subplots(1, 1, figsize=(7, 3))
     ax.plot(R_dead, c='lightskyblue', label=f'Deaths')
     ax.legend()
     ax.set_title('Total fatalities')
@@ -49,7 +49,7 @@ def plot_SIR(pandemic_info, as_percentage=True, stack=True, ax=None):
     R = pandemic_info["R"]
     death = pandemic_info["R_dead"]
     surv = pandemic_info["R_surv"]
-    
+
     if as_percentage:
         sum_SIR = (S+I+R)/100
         S, I, death, surv = S/sum_SIR, I/sum_SIR, death/sum_SIR, surv/sum_SIR
@@ -65,8 +65,8 @@ def plot_SIR(pandemic_info, as_percentage=True, stack=True, ax=None):
 
 
 def plot_each_group(PI):
-    fig, ax = plt.subplots(4, 2, figsize=(15,15))
-    
+    fig, ax = plt.subplots(4, 2, figsize=(15, 15))
+
     x = np.arange(len(PI["S"]))
     ax[0][0].plot(x, PI["S"],  color='lightskyblue', label=f'S')
     ax[0][1].bar(x, PI["I_inc"], color='darksalmon', label=f'I_inc')
@@ -79,6 +79,7 @@ def plot_each_group(PI):
     for i in range(len(ax)):
         for j in range(len(ax[i])):
             ax[i][j].legend()
+
 
 def plot_intervals(y):
     x = range(y.shape[-1])
@@ -100,6 +101,3 @@ def plot_intervals(y):
     cbar.ax.set_ylabel('Risk', rotation=270)
     cbar.ax.get_yaxis().set_major_formatter(mtick.PercentFormatter())
     cbar.ax.plot([0, 100], [50] * 2, 'k-', lw=0.5)
-
-
-
