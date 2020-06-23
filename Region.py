@@ -58,10 +58,16 @@ class Region:
 
         # Cyclical/periodic pattern of infection.
         if self.cyclical:
-            if self.I_crit > self.population_size*0.0005 and self.sampler.avg_people_met_pr_day == 6.86:
+            if self.I_crit > self.population_size * 0.0005:
                 self.sampler.avg_people_met_pr_day = self.cyclical
-            if self.I_crit <= self.population_size*0.00035 and self.sampler.avg_people_met_pr_day == self.cyclical:
+                self.sampler.contagion_prob = 0.02
+            else:
                 self.sampler.avg_people_met_pr_day = 6.86
+
+            #if self.I_crit > self.population_size*0.0005 and self.sampler.avg_people_met_pr_day == 6.86:
+            #    self.sampler.avg_people_met_pr_day = self.cyclical
+            #if self.I_crit <= self.population_size*0.00035 and self.sampler.avg_people_met_pr_day == self.cyclical:
+            #    self.sampler.avg_people_met_pr_day = 6.86
 
         control_variates['incubation_times'] = self.sampler.sample_incubation_times(new_infected)
         self.increment_array(self.transition_inc, control_variates['incubation_times'])

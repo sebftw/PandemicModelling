@@ -16,7 +16,7 @@ import pandas as pd
 
 from simulation import simulate, repeat_simulate
 
-n_repeats = 2
+n_repeats = 100
 
 plot_path = 'plots'
 
@@ -194,27 +194,57 @@ def scenario3():
     np.random.seed(7)
     # Simple SIR model.
     sampler = Sampler()
-
+    n_days = 365*1
     population_size = 500_000
-    I_initial = 5_000
-    copenhagen = Region('Copenhagen', population_size, sampler, I_initial)
+    I_initial = 500
+    copenhagen = Region('Copenhagen', population_size, sampler, I_initial, cyclical=2.5)
     country = Country([copenhagen])
 
-    symp_people_out = [0.0, 0.05, 0.1, 0.2, 0.5]
-    fig, axs = plt.subplots(1, len(symp_people_out), squeeze=True, sharey='row', figsize=(12, 4.5))
-    for ax, fraction_symp_out in zip(axs, symp_people_out):
-        sampler.fraction_symp_out = fraction_symp_out
-        result = simulate(country)
-        Plotter.plot_SIR(result, ax=ax)
-        ax.set_title(f'$Symp. out ={fraction_symp_out:.2f}$')
-        ax.set_xlabel('Days')
-    ax.set_xlabel('')
-    ax.legend(['I', 'S', 'R'], loc='upper center', bbox_to_anchor=(0.5, -0.17), fancybox=False, shadow=False, ncol=3)
-    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-    # fig.legend(['S', 'I', 'R'], bbox_to_anchor=(2, 0), loc='lower right')
-    # plt.subplots_adjust(left=0.07, right=0.93, wspace=0.25, hspace=0.35)
-    plt.savefig(os.path.join(plot_path, '3_SEIR.png'), dpi=300)
+    np.random.seed(7)
+    result = simulate(country, n_days=n_days)
+    Plotter.plot_SIR(result)
+    plt.legend()
+    plt.xlabel('Days')
+    plt.tight_layout()
+    plt.savefig(os.path.join(plot_path, '3_SEIR_periodic.png'), dpi=300)
     plt.show()
 
+    np.random.seed(7)
+    result = repeat_simulate(country, n_repeats=n_repeats, n_days=n_days)
+    Plotter.plot_intervals(result['I_crit'].copy(), plot_median=False)
+    plt.plot(result['I_crit'][0], '--k', label='Example path', lw=0.5)
+    plt.xlabel('Days')
+    plt.ylabel('# Hospitalized')
+    plt.hlines(copenhagen.population_size * 0.0005, *plt.xlim())
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(os.path.join(plot_path, '3_SEIR_periodic_hospitalized.png'), dpi=300)
+    plt.show()
+
+
+    sampler = Sampler()
+    n_days = 365*4
+    population_size = 500_000
+    I_initial = 500
+    copenhagen = Region('Copenhagen', population_size, sampler, I_initial, cyclical=2.5)
+    country = Country([copenhagen])
+
+    np.random.seed(7)
+    result = repeat_simulate(country, n_repeats=n_repeats, n_days=n_days)
+    Plotter.plot_intervals(result['I_crit'].copy(), plot_median=False)
+    plt.plot(result['I_crit'][0], '--k', label='Example path', lw=0.5)
+    plt.xlabel('Days')
+    plt.ylabel('# Hospitalized')
+    plt.hlines(copenhagen.population_size * 0.0005, *plt.xlim())
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(os.path.join(plot_path, '3_SEIR_periodic_hospitalized_long.png'), dpi=300)
+    plt.show()
+
+
+
+
+
+
 if __name__ == "__main__":
-    scenario2()
+    scenario3()
