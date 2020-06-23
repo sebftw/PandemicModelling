@@ -55,13 +55,15 @@ def plot_SIR(pandemic_info, as_percentage=True, stack=True, ax=None):
         S, I, death, surv = S/sum_SIR, I/sum_SIR, death/sum_SIR, surv/sum_SIR
         ax.yaxis.set_major_formatter(mtick.PercentFormatter())
 
-    labels = ["I", "S", "Surv", "Dead"]
-    colors = ["darksalmon", "darkslategray", "lightskyblue", "red"]
+    labels = ["S", "I", "Surv", "Dead"]
+    colors = ["darkslategray", "darksalmon", "lightskyblue", "red"]
     if stack:
-        ax.stackplot(list(range(len(S))), I, S, surv, death, colors=colors, labels=labels)
+        ax.stackplot(list(range(len(S))), S, I, surv, death, colors=colors, labels=labels)
     else:
-        for S, label, color in zip([I, S, surv, death], labels, colors):
+        for S, label, color in zip([S, I, surv, death], labels, colors):
             ax.plot(S, c=color, label=label)
+    ax.set_xlim([0, len(S)])
+    ax.set_ylim([0, 100])
 
 
 def plot_each_group(PI):
