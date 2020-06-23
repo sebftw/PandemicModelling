@@ -4,7 +4,7 @@ import numpy as np
 class Sampler:
     def __init__(self, avg_people_met_pr_day=6.86,
                  contagion_prob=0.04, crit_prob=0.2,
-                 death_prob=0.22, symp_prob=1.0, fraction_symp_out=1.0, incubation=True):
+                 death_prob=0.22, symp_prob=0.5, fraction_symp_out=0.1, incubation=True):
         self.avg_people_met_pr_day = avg_people_met_pr_day
 
         self.contagion_prob = contagion_prob
