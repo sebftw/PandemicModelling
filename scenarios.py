@@ -16,7 +16,7 @@ import pandas as pd
 
 from simulation import simulate, repeat_simulate
 
-n_repeats = 5
+n_repeats = 2
 
 plot_path = 'plots'
 
@@ -50,7 +50,6 @@ def scenario1():
     plt.show()
 
 def scenario2():
-
     # SEIR model.
     sampler = Sampler()  # crit_prob=0.0, symp_prob=1.0, fraction_symp_out=1.0
     # We have S -> E (latent/incubation period) -> I_symp -> R
@@ -62,6 +61,8 @@ def scenario2():
 
     contageon_probs = [0.02, 0.025, 0.04, 0.05]
     average_people_mets = [4, 5, 6.86, 10]
+    symp_people_out = [0.0, 0.1, 0.5, 1]
+
 
     fig, axs = plt.subplots(1, len(contageon_probs), squeeze=True, sharey='row', figsize=(12, 4))
     for i, (ax, contageon_prob) in enumerate(zip(axs, contageon_probs)):
@@ -130,6 +131,40 @@ def scenario2():
     plt.savefig(os.path.join(plot_path, '2_SEIR_distancing_hospitalized.png'), dpi=300)
     plt.show()
 
+    sampler.avg_people_met_pr_day = 6.86  # Set back to default
+    fig, axs = plt.subplots(1, len(symp_people_out), squeeze=True, sharey='row', figsize=(12, 4))
+    for i, (ax, fraction_symp_out) in enumerate(zip(axs, symp_people_out)):
+        sampler.fraction_symp_out = fraction_symp_out
+        np.random.seed(7)
+        result = simulate(country)
+        Plotter.plot_SIR(result, ax=ax)
+        ax.set_title(f'$p_o ={fraction_symp_out * 100:.1f}$%')
+        if i == 1:
+            ax.set_title(f'$\\bf p_o ={fraction_symp_out * 100:.1f}\%$')
+        ax.set_xlabel('Days')
+        if i == len(symp_people_out)-1:
+            ax.legend(['I', 'S', 'Recovered', 'Dead'], loc='upper center',
+                      bbox_to_anchor=(1.5, 1), fancybox=False, shadow=False, ncol=1)
+    plt.tight_layout()  # rect=[0, 0.03, 1, 0.95]
+    plt.savefig(os.path.join(plot_path, '2_SEIR_symp_out.png'), dpi=300)
+    plt.show()
+
+    fig, axs = plt.subplots(1, len(symp_people_out), squeeze=True, sharey='row', figsize=(12, 4))
+    for i, (ax, fraction_symp_out) in enumerate(zip(axs, symp_people_out)):
+        sampler.fraction_symp_out = fraction_symp_out
+        np.random.seed(7)
+        result = repeat_simulate(country, n_repeats=n_repeats)
+        Plotter.plot_intervals(result['I_crit'], ax=ax, colorbar=i==len(contageon_probs)-1)
+        ax.set_title(f'$p_o ={fraction_symp_out * 100:.1f}$%')
+        ax.set_xlabel('Days')
+        if i == 0:
+            ax.set_ylabel('# Hospitalized')
+        if i == 1:
+            ax.set_title(f'$\\bf p_o ={fraction_symp_out * 100:.1f}\%$')
+    plt.tight_layout()
+    plt.savefig(os.path.join(plot_path, '2_SEIR_symp_out_hospitalized.png'), dpi=300)
+    plt.show()
+
     if False:  # 2D grid plots
         fig, axs = plt.subplots(len(average_people_mets), len(contageon_probs), squeeze=False,
                                 sharey='row', sharex='col', figsize=(12, 12))
@@ -154,29 +189,6 @@ def scenario2():
         plt.savefig(os.path.join(plot_path, '2_SEIR.png'), dpi=300)
         plt.show()
 
-    return None
-    fig, axs = plt.subplots(len(average_people_mets), len(contageon_probs), squeeze=False,
-                            sharey='row', sharex='col', figsize=(12, 12))
-    for j, axs2 in enumerate(axs):
-        for i, ax in enumerate(axs2):
-            contageon_prob = contageon_probs[i]
-            average_people_met = average_people_mets[j]
-            sampler.contagion_prob = contageon_prob
-            sampler.avg_people_met_pr_day = average_people_met
-            result = repeat_simulate(country)
-            Plotter.plot_intervals(result['I'], ax=ax)
-            if j == 0:
-                ax.set_title(f'$p={contageon_prob:.2f}$')
-            if j == len(average_people_mets) - 1:
-                ax.set_xlabel('Days')
-                # if i == 1:
-                #    ax.legend(['I', 'S', 'Recovered', 'Dead'], loc='lower left',
-                #              bbox_to_anchor=(0.5, -0.54, 2, .102), fancybox=False, shadow=False, ncol=4)
-            if i == 0:
-                ax.set_ylabel(f'$Avg. met. ={average_people_met:.2f}$')
-
-    plt.savefig(os.path.join(plot_path, '2_SEIR_infections.png'), dpi=300)
-    plt.show()
 
 def scenario3():
     np.random.seed(7)
