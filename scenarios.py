@@ -16,6 +16,8 @@ import pandas as pd
 
 from simulation import simulate, repeat_simulate
 
+n_repeats = 5
+
 plot_path = 'plots'
 
 def scenario1():
@@ -48,7 +50,7 @@ def scenario1():
     plt.show()
 
 def scenario2():
-    np.random.seed(7)
+
     # SEIR model.
     sampler = Sampler()  # crit_prob=0.0, symp_prob=1.0, fraction_symp_out=1.0
     # We have S -> E (latent/incubation period) -> I_symp -> R
@@ -59,11 +61,12 @@ def scenario2():
     country = Country([copenhagen])
 
     contageon_probs = [0.02, 0.025, 0.04, 0.05]
-    average_people_mets = [3, 5, 6.86, 10]
+    average_people_mets = [4, 5, 6.86, 10]
 
     fig, axs = plt.subplots(1, len(contageon_probs), squeeze=True, sharey='row', figsize=(12, 4))
     for i, (ax, contageon_prob) in enumerate(zip(axs, contageon_probs)):
         sampler.contagion_prob = contageon_prob
+        np.random.seed(7)
         result = simulate(country)
         Plotter.plot_SIR(result, ax=ax)
         ax.set_title(f'$p={contageon_prob:.3f}$')
@@ -71,22 +74,60 @@ def scenario2():
         if i == len(contageon_probs)-1:
             ax.legend(['I', 'S', 'Recovered', 'Dead'], loc='upper center',
                       bbox_to_anchor=(1.5, 1), fancybox=False, shadow=False, ncol=1)
+        if i == 2:
+            ax.set_title(f'$\\bf p={contageon_prob:.3f}$')
+    plt.tight_layout()
     plt.savefig(os.path.join(plot_path, '2_SEIR_hygene.png'), dpi=300)
-    plt.tight_layout()  # rect=[0, 0.03, 1, 0.95]
     plt.show()
 
+    fig, axs = plt.subplots(1, len(contageon_probs), squeeze=True, sharey='row', figsize=(12, 4))
+    for i, (ax, contageon_prob) in enumerate(zip(axs, contageon_probs)):
+        sampler.contagion_prob = contageon_prob
+        np.random.seed(7)
+        result = repeat_simulate(country, n_repeats=n_repeats)
+        Plotter.plot_intervals(result['I_crit'], ax=ax, colorbar=i==len(contageon_probs)-1)
+        ax.set_title(f'$p={contageon_prob:.3f}$')
+        ax.set_xlabel('Days')
+        if i == 0:
+            ax.set_ylabel('# Hospitalized ($I_{crit}$)')
+        if i == 2:
+            ax.set_title(f'$\\bf p={contageon_prob:.3f}$')
+    plt.tight_layout()
+    plt.savefig(os.path.join(plot_path, '2_SEIR_hygene_hospitalized.png'), dpi=300)
+    plt.show()
+
+    sampler.contagion_prob = 0.04  # Set back to default
     fig, axs = plt.subplots(1, len(average_people_mets), squeeze=True, sharey='row', figsize=(12, 4))
     for i, (ax, avg_people_met_pr_day) in enumerate(zip(axs, average_people_mets)):
         sampler.avg_people_met_pr_day = avg_people_met_pr_day
+        np.random.seed(7)
         result = simulate(country)
         Plotter.plot_SIR(result, ax=ax)
-        ax.set_title(f'$Avg. met ={avg_people_met_pr_day:.3f}$')
+        ax.set_title(f'$Avg. met ={avg_people_met_pr_day:.2f}$')
+        if i == 2:
+            ax.set_title(f'$\\bf Avg. met ={avg_people_met_pr_day:.2f}$')
         ax.set_xlabel('Days')
         if i == len(average_people_mets)-1:
             ax.legend(['I', 'S', 'Recovered', 'Dead'], loc='upper center',
                       bbox_to_anchor=(1.5, 1), fancybox=False, shadow=False, ncol=1)
-    plt.savefig(os.path.join(plot_path, '2_SEIR_distancing.png'), dpi=300)
     plt.tight_layout()  # rect=[0, 0.03, 1, 0.95]
+    plt.savefig(os.path.join(plot_path, '2_SEIR_distancing.png'), dpi=300)
+    plt.show()
+
+    fig, axs = plt.subplots(1, len(contageon_probs), squeeze=True, sharey='row', figsize=(12, 4))
+    for i, (ax, avg_people_met_pr_day) in enumerate(zip(axs, average_people_mets)):
+        sampler.avg_people_met_pr_day = avg_people_met_pr_day
+        np.random.seed(7)
+        result = repeat_simulate(country, n_repeats=n_repeats)
+        Plotter.plot_intervals(result['I_crit'], ax=ax, colorbar=i==len(contageon_probs)-1)
+        ax.set_title(f'$Avg. met ={avg_people_met_pr_day:.2f}$')
+        ax.set_xlabel('Days')
+        if i == 0:
+            ax.set_ylabel('# Hospitalized')
+        if i == 2:
+            ax.set_title(f'$\\bf Avg. met ={avg_people_met_pr_day:.2f}$')
+    plt.tight_layout()
+    plt.savefig(os.path.join(plot_path, '2_SEIR_distancing_hospitalized.png'), dpi=300)
     plt.show()
 
     if False:  # 2D grid plots

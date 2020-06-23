@@ -83,7 +83,7 @@ def plot_each_group(PI):
             ax[i][j].legend()
 
 
-def plot_intervals(y, ax=None):
+def plot_intervals(y, ax=None, colorbar=True):
     if ax is None:
         fig, ax = plt.subplots(1, 1, figsize=(12, 8))
     x = range(y.shape[-1])
@@ -97,11 +97,11 @@ def plot_intervals(y, ax=None):
     for i in reversed(range(len(y))):
         p = i / (len(y) - 1) * 100
         ax.fill_between(x, *y[[0, i], :], color=cmap(norm(p)))
-    cbar = plt.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap.reversed()), ax=ax)
     # ax.legend(['median'], loc='best')
     ax.set_xlabel('Day')
-
-    cbar.ax.get_yaxis().labelpad = 15
-    cbar.ax.set_ylabel('Risk', rotation=270)
-    cbar.ax.get_yaxis().set_major_formatter(mtick.PercentFormatter())
-    cbar.ax.plot([0, 100], [50] * 2, 'k-', lw=0.5)
+    if colorbar:
+        cbar = plt.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap.reversed()), ax=ax)
+        cbar.ax.get_yaxis().labelpad = 15
+        cbar.ax.set_ylabel('Risk', rotation=270)
+        cbar.ax.get_yaxis().set_major_formatter(mtick.PercentFormatter())
+        cbar.ax.plot([0, 100], [50] * 2, 'k-', lw=0.5)
