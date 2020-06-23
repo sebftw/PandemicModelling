@@ -24,6 +24,8 @@ class Sampler:
     def get_new_infected(self, I_no_symp, S, I_symp, R_surv):
         I = I_no_symp + I_symp * self.fraction_symp_out
         n_meetable = I + S + R_surv
+        if n_meetable == 0:
+            return 0
 
         total_S_people_met = np.random.poisson(I * self.avg_people_met_pr_day * (S / n_meetable))
 

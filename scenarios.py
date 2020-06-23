@@ -6,6 +6,7 @@ from Country import Country
 import Plotter
 import time
 from tqdm import tqdm
+import matplotlib.ticker as mtick
 from Plotter import collate, reduce
 from multiprocessing import Pool
 import copy
@@ -241,10 +242,40 @@ def scenario3():
     plt.savefig(os.path.join(plot_path, '3_SEIR_periodic_hospitalized_long.png'), dpi=300)
     plt.show()
 
+def scenario4():
+    # High death rate
+    sampler = Sampler(death_prob=1.0, crit_prob=1.0, symp_prob=1.0, contagion_prob=0.0228)
+    #  6.86*4.67416*0.04 = 1.28259
+    n_days = 5000
+    population_size = 500_000
+    I_initial = 5_000
+    copenhagen = Region('Copenhagen', population_size, sampler, I_initial)
+    country = Country([copenhagen])
 
+    np.random.seed(7)
+    result = simulate(country, n_days=n_days)
+    Plotter.plot_SIR(result)
+    plt.legend()
+    plt.xlabel('Days')
+    plt.tight_layout()
+    plt.savefig(os.path.join(plot_path, '4_DEATH.png'), dpi=300)
+    plt.show()
+
+    np.random.seed(7)
+    result = repeat_simulate(country, n_repeats=n_repeats, n_days=n_days)
+    Plotter.plot_intervals((result['R_dead'] / copenhagen.population_size).copy() * 100, plot_median=False)
+    plt.plot((result['R_dead'] / copenhagen.population_size)[0] * 100, '--k', label='Example path', lw=0.5)
+    plt.gca().yaxis.set_major_formatter(mtick.PercentFormatter())
+    plt.xlabel('Days')
+    plt.ylabel('% Dead')
+    plt.hlines(100, *plt.xlim())
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(os.path.join(plot_path, '4_DEATH_deaths.png'), dpi=300)
+    plt.show()
 
 
 
 
 if __name__ == "__main__":
-    scenario3()
+    scenario5()
